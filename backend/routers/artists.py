@@ -4,7 +4,7 @@ import secrets
 from datetime import datetime, timedelta
 from fastapi import APIRouter, Depends, HTTPException, UploadFile, File
 from sqlmodel import Session, select
-from models import Kuenstler, KuenstlerCreate, KuenstlerPublic
+from models import Kuenstler, KuenstlerCreate, KuenstlerPublic, Bild
 from database import get_session
 from services import email_service
 from services.image_service import compress_image, save_image
@@ -18,7 +18,17 @@ UPLOAD_DIR = os.getenv("UPLOAD_DIR", "./uploads")
 
 @router.get("/", response_model=list[KuenstlerPublic])
 def list_kuenstler(session: Session = Depends(get_session)):
-    return session.exec(select(Kuenstler).where(Kuenstler.aktiv == True)).all()
+    # Nur Künstler mit mindestens einem freigegebenen Bild mit Foto
+    mit_bild = select(Bild.kuenstler_id).where(
+        Bild.freigegeben == True,
+        Bild.bild_url_web != None,
+    ).distinct()
+    return session.exec(
+        select(Kuenstler).where(
+            Kuenstler.aktiv == True,
+            Kuenstler.id.in_(mit_bild),
+        )
+    ).all()
 
 
 @router.get("/{kuenstler_id}", response_model=KuenstlerPublic)
