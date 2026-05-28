@@ -1,12 +1,16 @@
+import os
 from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Body
 from sqlmodel import Session, select
 from pydantic import BaseModel
 from models import Bild, BildPublic, Kuenstler, Reservierung, Kauf
 from database import get_session
 from services.import_service import import_csv, import_excel
+from services.image_service import compress_image, save_image
 import csv, io
 
 router = APIRouter(prefix="/admin", tags=["Admin"])
+
+UPLOAD_DIR = os.getenv("UPLOAD_DIR", "./uploads")
 
 
 # --- Bilder freischalten ---
@@ -45,6 +49,26 @@ def preis_setzen(bild_id: int, verkaufspreis: float, session: Session = Depends(
     session.add(bild)
     session.commit()
     return {"verkaufspreis": verkaufspreis}
+
+
+# --- Foto-Upload ---
+
+@router.post("/bilder/{bild_id}/foto")
+async def foto_hochladen(
+    bild_id: int,
+    file: UploadFile = File(...),
+    session: Session = Depends(get_session),
+):
+    bild = session.get(Bild, bild_id)
+    if not bild:
+        raise HTTPException(404)
+    data = await file.read()
+    web_bytes, orig_bytes = compress_image(data, file.filename)
+    web_url, _ = save_image(web_bytes, orig_bytes, bild.bild_nr, UPLOAD_DIR)
+    bild.bild_url_web = web_url
+    session.add(bild)
+    session.commit()
+    return {"bild_url_web": web_url}
 
 
 # --- CSV/Excel-Import ---

@@ -1,6 +1,6 @@
 "use client";
-import { useEffect, useState, useMemo } from "react";
-import { getAlleBilder, massenFreigeben, bilderFreigeben, preisSetzen } from "@/lib/api";
+import { useEffect, useState, useMemo, useRef } from "react";
+import { getAlleBilder, massenFreigeben, bilderFreigeben, preisSetzen, fotoHochladen } from "@/lib/api";
 import { Bild } from "@/lib/types";
 
 type Filter = "alle" | "offen" | "mit_foto" | "ohne_foto";
@@ -12,6 +12,8 @@ export default function AdminBilderPage() {
   const [filter, setFilter] = useState<Filter>("offen");
   const [laden, setLaden] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [uploadingId, setUploadingId] = useState<number | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     getAlleBilder().then(setBilder).finally(() => setLaden(false));
@@ -56,6 +58,25 @@ export default function AdminBilderPage() {
     setBilder(prev => prev.map(b => b.id === id ? { ...b, freigegeben: true } : b));
   }
 
+  function handleFotoKlick(id: number) {
+    setUploadingId(id);
+    fileInputRef.current!.value = "";
+    fileInputRef.current!.click();
+  }
+
+  async function handleFotoChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file || !uploadingId) return;
+    try {
+      const { bild_url_web } = await fotoHochladen(uploadingId, file);
+      setBilder(prev => prev.map(b => b.id === uploadingId ? { ...b, bild_url_web } : b));
+    } catch (err: any) {
+      alert(`Fehler: ${err.message}`);
+    } finally {
+      setUploadingId(null);
+    }
+  }
+
   async function handlePreis(id: number) {
     const preis = parseFloat(preise[id] ?? "");
     if (!preis) return;
@@ -77,6 +98,7 @@ export default function AdminBilderPage() {
 
   return (
     <div className="space-y-4">
+      <input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={handleFotoChange} />
       {/* Kopfzeile */}
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold text-lions-blue">Bildverwaltung</h1>
@@ -172,10 +194,18 @@ export default function AdminBilderPage() {
                     </div>
                   )}
                 </td>
-                <td className="px-3 py-2.5 text-center">
-                  {b.bild_url_web
-                    ? <span className="text-green-600 text-base">✓</span>
-                    : <span className="text-gray-300">—</span>}
+                <td className="px-3 py-2.5 text-center" onClick={e => e.stopPropagation()}>
+                  {b.bild_url_web ? (
+                    <span className="text-green-600 text-base" title={b.bild_url_web}>✓</span>
+                  ) : uploadingId === b.id ? (
+                    <span className="text-xs text-gray-400 animate-pulse">lädt…</span>
+                  ) : (
+                    <button
+                      onClick={() => handleFotoKlick(b.id)}
+                      className="text-xs text-lions-blue underline hover:text-blue-900 whitespace-nowrap">
+                      + Foto
+                    </button>
+                  )}
                 </td>
                 <td className="px-3 py-2.5 text-center" onClick={e => e.stopPropagation()}>
                   <span className={`text-xs px-2 py-0.5 rounded-full ${

@@ -70,3 +70,11 @@ export const preisSetzen = (id: number, preis: number) =>
   req(`/admin/bilder/${id}/preis?verkaufspreis=${preis}`, { method: "PATCH" });
 export const getAlleReservierungen = () => req("/admin/reservierungen");
 export const getAlleKaeufe = () => req("/admin/kaeufe");
+
+export async function fotoHochladen(bildId: number, file: File): Promise<{ bild_url_web: string }> {
+  const fd = new FormData();
+  fd.append("file", file);
+  const res = await fetch(`${BASE}/admin/bilder/${bildId}/foto`, { method: "POST", body: fd });
+  if (!res.ok) throw new Error(await res.text());
+  return res.json();
+}
