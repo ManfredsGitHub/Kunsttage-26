@@ -2,7 +2,9 @@ import os
 from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Body
 from sqlmodel import Session, select
 from pydantic import BaseModel
-from models import Bild, BildPublic, Kuenstler, Reservierung, Kauf, Besucher, MerklisteEintrag
+import secrets
+from datetime import datetime, timedelta
+from models import Bild, BildPublic, Kuenstler, KuenstlerCreate, Reservierung, Kauf, Besucher, MerklisteEintrag
 from database import get_session
 from services.import_service import import_csv, import_excel
 from services.image_service import compress_image, save_image
@@ -117,6 +119,44 @@ def druckliste(session: Session = Depends(get_session)):
 @router.get("/bilder/alle", response_model=list[BildPublic])
 def alle_bilder(session: Session = Depends(get_session)):
     return session.exec(select(Bild).order_by(Bild.bild_nr)).all()
+
+
+@router.post("/kuenstler")
+def kuenstler_anlegen(daten: KuenstlerCreate, session: Session = Depends(get_session)):
+    db_ident = f"voort_{daten.db_name.lower().replace(' ', '_')}_{daten.db_vorname.lower().replace(' ', '_')}"
+    # Eindeutigkeit sicherstellen
+    basis = db_ident
+    zähler = 1
+    while session.exec(select(Kuenstler).where(Kuenstler.db_ident == db_ident)).first():
+        db_ident = f"{basis}_{zähler}"
+        zähler += 1
+    k = Kuenstler(
+        db_ident=db_ident,
+        db_name=daten.db_name,
+        db_vorname=daten.db_vorname,
+        db_email=daten.db_email,
+        db_telefon=daten.db_telefon,
+        db_adresse=daten.db_adresse,
+        kuenstlertyp="VorOrt",
+        aktiv=True,
+    )
+    session.add(k)
+    session.commit()
+    session.refresh(k)
+    return {"id": k.id, "db_ident": k.db_ident}
+
+
+@router.post("/kuenstler/{kuenstler_id}/einladen")
+def kuenstler_einladen(kuenstler_id: int, session: Session = Depends(get_session)):
+    k = session.get(Kuenstler, kuenstler_id)
+    if not k:
+        raise HTTPException(404)
+    token = secrets.token_urlsafe(32)
+    k.login_token = token
+    k.login_token_expiry = datetime.utcnow() + timedelta(hours=48)
+    session.add(k)
+    session.commit()
+    return {"token": token, "portal_url": f"/kuenstler/login?token={token}"}
 
 
 @router.get("/reservierungen")
