@@ -20,7 +20,7 @@ def list_bilder(
     nur_verfuegbar: bool = True,
     session: Session = Depends(get_session),
 ):
-    q = select(Bild).where(Bild.freigegeben == True)
+    q = select(Bild).where(Bild.freigegeben == True, Bild.bild_url_web != None)
     if nur_verfuegbar:
         q = q.where(Bild.verfuegbarkeit == Verfuegbarkeit.verfuegbar)
     if genre:
