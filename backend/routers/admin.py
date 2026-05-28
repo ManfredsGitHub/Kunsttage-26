@@ -2,7 +2,7 @@ import os
 from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Body
 from sqlmodel import Session, select
 from pydantic import BaseModel
-from models import Bild, BildPublic, Kuenstler, Reservierung, Kauf
+from models import Bild, BildPublic, Kuenstler, Reservierung, Kauf, Besucher, MerklisteEintrag
 from database import get_session
 from services.import_service import import_csv, import_excel
 from services.image_service import compress_image, save_image
@@ -127,3 +127,33 @@ def alle_reservierungen(session: Session = Depends(get_session)):
 @router.get("/kaeufe")
 def alle_kaeufe(session: Session = Depends(get_session)):
     return session.exec(select(Kauf)).all()
+
+
+@router.get("/merklisten")
+def alle_merklisten(session: Session = Depends(get_session)):
+    besucher_liste = session.exec(
+        select(Besucher).order_by(Besucher.erstellt_am.desc())
+    ).all()
+    result = []
+    for b in besucher_liste:
+        eintraege = session.exec(
+            select(MerklisteEintrag)
+            .where(MerklisteEintrag.besucher_id == b.id)
+            .order_by(MerklisteEintrag.hinzugefuegt_am)
+        ).all()
+        bild_ids = [e.bild_id for e in eintraege]
+        bilder = []
+        for bid in bild_ids:
+            bild = session.get(Bild, bid)
+            if bild:
+                _ = bild.kuenstler
+                bilder.append(BildPublic.model_validate(bild))
+        result.append({
+            "id": b.id,
+            "email": b.email,
+            "telefon": b.telefon,
+            "erstellt_am": b.erstellt_am,
+            "anzahl": len(bilder),
+            "bilder": bilder,
+        })
+    return result
