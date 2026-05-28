@@ -7,7 +7,7 @@ import os
 load_dotenv()
 
 from database import create_db
-from routers import artworks, reservations, sales, artists, admin
+from routers import artworks, reservations, sales, artists, admin, merkliste
 
 app = FastAPI(title="Lions Kunsttage API", version="1.0.0")
 
@@ -24,6 +24,7 @@ app.include_router(reservations.router)
 app.include_router(sales.router)
 app.include_router(artists.router)
 app.include_router(admin.router)
+app.include_router(merkliste.router)
 
 UPLOAD_DIR = os.getenv("UPLOAD_DIR", "./uploads")
 os.makedirs(UPLOAD_DIR, exist_ok=True)

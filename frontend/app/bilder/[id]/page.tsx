@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import { getBild, reservieren } from "@/lib/api";
 import { Bild } from "@/lib/types";
+import MerklistenButton from "@/components/MerklistenButton";
 
 const API = process.env.NEXT_PUBLIC_API_URL;
 
@@ -164,7 +165,11 @@ export default function BildDetailPage() {
       {/* Details */}
       <div className="space-y-6">
         <div>
-          <h1 className="text-2xl font-bold text-lions-blue">{bild.bildtitel}</h1>
+          <div className="flex items-start justify-between gap-3">
+            <h1 className="text-2xl font-bold text-lions-blue">{bild.bildtitel}</h1>
+            <MerklistenButton bildId={bild.id} size="md"
+              className="flex-shrink-0 mt-1" />
+          </div>
 
           {bild.kuenstler && (
             <div className="mt-3 flex items-start gap-3">

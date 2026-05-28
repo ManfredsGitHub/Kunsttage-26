@@ -1,8 +1,9 @@
 import Link from "next/link";
+import MerklisteNavLink from "./MerklisteNavLink";
 
 export default function Header() {
   return (
-    <header className="bg-lions-blue text-white">
+    <header className="bg-lions-blue text-white print:hidden">
       <div className="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between">
         <Link href="/" className="flex items-center gap-3">
           <span className="text-lions-gold font-bold text-xl tracking-wide">LIONS</span>
@@ -11,6 +12,7 @@ export default function Header() {
         <nav className="flex gap-6 text-sm">
           <Link href="/" className="hover:text-lions-gold transition-colors">Galerie</Link>
           <Link href="/kuenstler" className="hover:text-lions-gold transition-colors">Künstler</Link>
+          <MerklisteNavLink />
           <Link href="/kuenstler/login" className="hover:text-lions-gold transition-colors">Künstler-Login</Link>
         </nav>
       </div>

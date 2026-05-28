@@ -1,0 +1,157 @@
+"use client";
+import { useEffect, useState } from "react";
+import Link from "next/link";
+import { useMerkliste } from "@/lib/MerklisteContext";
+import { getMerkliste } from "@/lib/api";
+import { Bild } from "@/lib/types";
+
+const API = process.env.NEXT_PUBLIC_API_URL;
+
+export default function MerklistePage() {
+  const { token, ids, toggle, openModal } = useMerkliste();
+  const [bilder, setBilder] = useState<Bild[]>([]);
+  const [laden, setLaden] = useState(false);
+
+  useEffect(() => {
+    if (!token) return;
+    setLaden(true);
+    getMerkliste(token)
+      .then(data => setBilder(data.bilder))
+      .finally(() => setLaden(false));
+  }, [token]);
+
+  async function handleRemove(bildId: number) {
+    await toggle(bildId);
+    setBilder(prev => prev.filter(b => b.id !== bildId));
+  }
+
+  if (!token) {
+    return (
+      <div className="text-center py-20">
+        <div className="text-5xl mb-5 text-gray-300">♡</div>
+        <h1 className="text-2xl font-bold text-gray-800 mb-2">Ihre Merkliste</h1>
+        <p className="text-gray-500 mb-6 max-w-sm mx-auto">
+          Melden Sie sich an, um Ihre persönliche Favoritenliste zu erstellen und zur Ausstellung mitzubringen.
+        </p>
+        <button
+          onClick={openModal}
+          className="bg-lions-blue text-white px-6 py-3 rounded-lg font-medium hover:bg-blue-900 transition-colors">
+          Anmelden / Merkliste erstellen
+        </button>
+      </div>
+    );
+  }
+
+  return (
+    <div>
+      {/* Bildschirm-Kopfzeile */}
+      <div className="flex items-center justify-between mb-6 print:hidden">
+        <h1 className="text-2xl font-bold text-lions-blue">Meine Merkliste</h1>
+        {bilder.length > 0 && (
+          <button
+            onClick={() => window.print()}
+            className="flex items-center gap-2 bg-lions-blue text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-blue-900 transition-colors">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+              strokeWidth={1.5} stroke="currentColor" className="w-4 h-4">
+              <path strokeLinecap="round" strokeLinejoin="round"
+                d="M6.72 13.829c-.24.03-.48.062-.72.096m.72-.096a42.415 42.415 0 0110.56 0m-10.56 0L6.34 18m10.94-4.171c.24.03.48.062.72.096m-.72-.096L17.66 18m0 0l.229 2.523a1.125 1.125 0 01-1.12 1.227H7.231c-.662 0-1.18-.568-1.12-1.227L6.34 18m11.318 0h1.091A2.25 2.25 0 0021 15.75V9.456c0-1.081-.768-2.015-1.837-2.175a48.055 48.055 0 00-1.913-.247M6.34 18H5.25A2.25 2.25 0 013 15.75V9.456c0-1.081.768-2.015 1.837-2.175a48.056 48.056 0 011.913-.247m10.5 0a48.536 48.536 0 00-10.5 0m10.5 0V3.375c0-.621-.504-1.125-1.125-1.125h-8.25c-.621 0-1.125.504-1.125 1.125v3.659M18 10.5h.008v.008H18V10.5zm-3 0h.008v.008H15V10.5z" />
+            </svg>
+            Liste drucken
+          </button>
+        )}
+      </div>
+
+      {/* Druck-Kopfzeile */}
+      <div className="hidden print:block mb-8">
+        <div className="flex justify-between items-start border-b pb-4 mb-2">
+          <div>
+            <h1 className="text-xl font-bold">Meine Merkliste · Lions Kunsttage 2026</h1>
+            <p className="text-sm text-gray-600 mt-0.5">Villa Ludwigshöhe · Benefizausstellung</p>
+          </div>
+          <p className="text-sm text-gray-500">{new Date().toLocaleDateString("de-DE", { day: "2-digit", month: "long", year: "numeric" })}</p>
+        </div>
+        <p className="text-sm text-gray-500 italic">Bitte bringen Sie diese Liste zur Ausstellung mit. Die Preise sind unverbindlich.</p>
+      </div>
+
+      {laden ? (
+        <p className="text-gray-400 animate-pulse">Laden…</p>
+      ) : bilder.length === 0 ? (
+        <div className="text-center py-16 text-gray-500">
+          <p>Ihre Merkliste ist leer.</p>
+          <Link href="/" className="inline-block mt-3 text-lions-blue hover:underline text-sm">
+            Zur Galerie →
+          </Link>
+        </div>
+      ) : (
+        <>
+          <div className="space-y-3">
+            {bilder.map((b, i) => (
+              <div key={b.id}
+                className="bg-white rounded-lg shadow-sm border p-4 flex gap-4 items-start print:shadow-none print:border-gray-200 print:rounded-none print:border-0 print:border-b">
+                {/* Laufende Nummer (nur Druck) */}
+                <span className="hidden print:block text-gray-400 text-sm pt-1 w-5 flex-shrink-0">{i + 1}.</span>
+
+                {/* Thumbnail */}
+                <div className="w-20 h-20 flex-shrink-0 rounded overflow-hidden bg-gray-100 print:w-16 print:h-16">
+                  {b.bild_url_web ? (
+                    <img src={`${API}${b.bild_url_web}`} alt={b.bildtitel}
+                      className="w-full h-full object-cover" />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center text-gray-300 text-xs">—</div>
+                  )}
+                </div>
+
+                {/* Details */}
+                <div className="flex-1 min-w-0">
+                  <div className="flex justify-between items-start gap-2">
+                    <a href={`/bilder/${b.id}`}
+                      className="font-semibold text-gray-900 hover:text-lions-blue transition-colors print:text-black print:no-underline">
+                      {b.bildtitel}
+                    </a>
+                    <span className={`flex-shrink-0 text-xs px-2 py-0.5 rounded-full font-medium ${
+                      b.verfuegbarkeit === "Verfügbar" ? "bg-green-100 text-green-800" :
+                      b.verfuegbarkeit === "Reserviert" ? "bg-yellow-100 text-yellow-800" :
+                      "bg-red-100 text-red-800"
+                    }`}>{b.verfuegbarkeit}</span>
+                  </div>
+                  {b.kuenstler && (
+                    <p className="text-sm text-gray-500 mt-0.5">
+                      {b.kuenstler.db_vorname} {b.kuenstler.db_name}
+                    </p>
+                  )}
+                  <div className="flex flex-wrap gap-x-4 gap-y-0.5 mt-1.5 text-xs text-gray-500">
+                    <span>{b.bildtechnik}</span>
+                    {b.breite_rahmen_cm > 0 && (
+                      <span>{b.breite_rahmen_cm} × {b.hoehe_rahmen_cm} cm</span>
+                    )}
+                    {b.verkaufspreis && (
+                      <span className="text-lions-blue font-semibold print:text-black">
+                        {b.verkaufspreis.toFixed(0)} €
+                      </span>
+                    )}
+                    <span className="text-gray-300">Nr. {b.bild_nr}</span>
+                  </div>
+                </div>
+
+                {/* Entfernen-Button */}
+                <button
+                  onClick={() => handleRemove(b.id)}
+                  className="print:hidden text-gray-300 hover:text-red-400 transition-colors flex-shrink-0"
+                  title="Entfernen">
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                    strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+            ))}
+          </div>
+
+          <p className="text-sm text-gray-400 mt-4 print:hidden">
+            {bilder.length} {bilder.length === 1 ? "Werk" : "Werke"} gespeichert
+          </p>
+        </>
+      )}
+    </div>
+  );
+}

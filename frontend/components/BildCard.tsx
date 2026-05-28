@@ -1,6 +1,7 @@
+"use client";
 import Link from "next/link";
-import Image from "next/image";
 import { Bild } from "@/lib/types";
+import MerklistenButton from "./MerklistenButton";
 
 const statusColors: Record<string, string> = {
   "Verfügbar": "bg-green-100 text-green-800",
@@ -15,7 +16,7 @@ export default function BildCard({ bild }: { bild: Bild }) {
 
   return (
     <Link href={`/bilder/${bild.id}`}>
-      <div className="bg-white rounded-lg shadow hover:shadow-md transition-shadow overflow-hidden group">
+      <div className="bg-white rounded-lg shadow hover:shadow-md transition-shadow overflow-hidden group relative">
         <div className="relative aspect-[4/3] bg-gray-100">
           <img
             src={imgSrc}
@@ -27,7 +28,7 @@ export default function BildCard({ bild }: { bild: Bild }) {
             {bild.verfuegbarkeit}
           </span>
         </div>
-        <div className="p-4">
+        <div className="p-4 pb-3">
           <p className="font-semibold text-gray-900 truncate">{bild.bildtitel}</p>
           {bild.kuenstler && (
             <p className="text-sm text-gray-500 mt-0.5">
@@ -45,6 +46,9 @@ export default function BildCard({ bild }: { bild: Bild }) {
               {bild.breite_rahmen_cm} × {bild.hoehe_rahmen_cm} cm
             </p>
           )}
+        </div>
+        <div className="absolute bottom-3 right-3" onClick={e => e.stopPropagation()}>
+          <MerklistenButton bildId={bild.id} />
         </div>
       </div>
     </Link>

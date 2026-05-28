@@ -71,6 +71,22 @@ export const preisSetzen = (id: number, preis: number) =>
 export const getAlleReservierungen = () => req("/admin/reservierungen");
 export const getAlleKaeufe = () => req("/admin/kaeufe");
 
+// --- Merkliste ---
+export const merklisteAnmelden = (email?: string, telefon?: string) =>
+  req<{ token: string; besucher_id: number }>("/merkliste/anmelden", {
+    method: "POST",
+    body: JSON.stringify({ email: email ?? null, telefon: telefon ?? null }),
+  });
+
+export const getMerkliste = (token: string) =>
+  req<{ bilder: Bild[] }>(`/merkliste/?token=${encodeURIComponent(token)}`);
+
+export const merklisteHinzufuegen = (token: string, bildId: number) =>
+  req(`/merkliste/${bildId}?token=${encodeURIComponent(token)}`, { method: "POST" });
+
+export const merklisteEntfernen = (token: string, bildId: number) =>
+  req(`/merkliste/${bildId}?token=${encodeURIComponent(token)}`, { method: "DELETE" });
+
 export async function fotoHochladen(bildId: number, file: File): Promise<{ bild_url_web: string }> {
   const fd = new FormData();
   fd.append("file", file);

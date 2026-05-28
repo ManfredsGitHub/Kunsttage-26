@@ -187,3 +187,22 @@ class KaufCreate(SQLModel):
     kaeufer_ort: str
     kaeufer_email: str
     zahlungsart: Zahlungsart
+
+
+# --- Merkliste ---
+
+class Besucher(SQLModel, table=True):
+    id: Optional[int] = Field(default=None, primary_key=True)
+    email: Optional[str] = Field(default=None, index=True)
+    telefon: Optional[str] = None
+    token: str = Field(unique=True, index=True)
+    erstellt_am: datetime = Field(default_factory=datetime.utcnow)
+    eintraege: List["MerklisteEintrag"] = Relationship(back_populates="besucher")
+
+
+class MerklisteEintrag(SQLModel, table=True):
+    id: Optional[int] = Field(default=None, primary_key=True)
+    besucher_id: int = Field(foreign_key="besucher.id")
+    bild_id: int = Field(foreign_key="bild.id")
+    hinzugefuegt_am: datetime = Field(default_factory=datetime.utcnow)
+    besucher: Optional["Besucher"] = Relationship(back_populates="eintraege")
