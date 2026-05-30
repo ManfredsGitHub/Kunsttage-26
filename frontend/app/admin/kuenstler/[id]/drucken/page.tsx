@@ -34,7 +34,6 @@ export default function DruckenPage() {
     if (kuenstler) {
       const name = [kuenstler.db_vorname, kuenstler.db_name].filter(Boolean).join(" ");
       document.title = `Vita – ${name}`;
-      setTimeout(() => window.print(), 400);
     }
   }, [kuenstler]);
 
