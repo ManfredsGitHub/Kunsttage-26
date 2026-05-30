@@ -11,8 +11,8 @@ const API = process.env.NEXT_PUBLIC_API_URL;
 // Maßstabgerechte Wandansicht
 // ---------------------------------------------------------------------------
 function WandVorschau({ bild }: { bild: Bild }) {
-  const h = bild.hoehe_rahmen_cm ?? 0;
-  const w = bild.breite_rahmen_cm ?? 0;
+  const h = (bild.hoehe_rahmen_cm ?? 0) > 0 ? bild.hoehe_rahmen_cm! : (bild.hoehe_cm ?? 0);
+  const w = (bild.breite_rahmen_cm ?? 0) > 0 ? bild.breite_rahmen_cm! : (bild.breite_cm ?? 0);
   if (h === 0 && w === 0) return null;
 
   const SCENE_W = 600;
@@ -200,14 +200,10 @@ export default function BildDetailPage() {
                     {bild.kuenstler.db_kommentar}
                   </p>
                 )}
-                {bild.kuenstler.kuenstlertyp !== "Eigenbestand" && (
-                  <a href={`/kuenstler/${bild.kuenstler.id}`}
-                    className="inline-block mt-1.5 text-xs text-lions-blue hover:underline">
-                    {bild.kuenstler.kuenstlertyp === "VorOrt"
-                      ? "Portrait & Vita ansehen →"
-                      : "Weitere Werke & Infos →"}
-                  </a>
-                )}
+                <a href={`/kuenstler/${bild.kuenstler.id}`}
+                  className="inline-block mt-1.5 text-xs text-lions-blue hover:underline">
+                  Portrait & Vita ansehen →
+                </a>
               </div>
             </div>
           )}
