@@ -8,11 +8,15 @@ import { Bild } from "@/lib/types";
 const API = process.env.NEXT_PUBLIC_API_URL;
 
 export default function MerklistePage() {
-  const { token, email, ids, toggle, openModal } = useMerkliste();
+  const { token, email, telefon, ids, toggle, openModal, updateProfil } = useMerkliste();
   const [bilder, setBilder] = useState<Bild[]>([]);
   const [laden, setLaden] = useState(false);
   const [mailLaden, setMailLaden] = useState(false);
   const [mailStatus, setMailStatus] = useState<"" | "ok" | "fehler">("");
+  const [emailErgaenzen, setEmailErgaenzen] = useState(false);
+  const [neueEmail, setNeueEmail] = useState("");
+  const [neuesTelefon, setNeuesTelefon] = useState("");
+  const [profilLaden, setProfilLaden] = useState(false);
 
   const druckTitel = email
     ? `Kunsttag26_Merkliste_von_${email}`
@@ -30,6 +34,15 @@ export default function MerklistePage() {
       .then(data => setBilder(data.bilder))
       .finally(() => setLaden(false));
   }, [token]);
+
+  async function handleProfilSpeichern() {
+    setProfilLaden(true);
+    try {
+      await updateProfil(neueEmail || undefined, neuesTelefon || undefined);
+      setEmailErgaenzen(false);
+      setNeueEmail(""); setNeuesTelefon("");
+    } finally { setProfilLaden(false); }
+  }
 
   async function handleZusenden() {
     if (!token) return;
@@ -68,6 +81,40 @@ export default function MerklistePage() {
 
   return (
     <div>
+      {/* Kontakt-Info + E-Mail ergänzen */}
+      {token && (
+        <div className="mb-4 print:hidden">
+          <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-gray-500">
+            {email && <span>✉ {email}</span>}
+            {telefon && <span>☏ {telefon}</span>}
+            <button onClick={() => { setEmailErgaenzen(v => !v); setNeueEmail(email ?? ""); setNeuesTelefon(telefon ?? ""); }}
+              className="text-lions-blue hover:underline text-xs">
+              {emailErgaenzen ? "Abbrechen" : (email && telefon) ? "Kontakt bearbeiten" : "Kontakt ergänzen"}
+            </button>
+          </div>
+          {emailErgaenzen && (
+            <div className="mt-3 flex flex-wrap items-end gap-3 bg-gray-50 rounded-lg p-3">
+              <div>
+                <label className="block text-xs text-gray-500 mb-1">E-Mail</label>
+                <input type="email" value={neueEmail} onChange={e => setNeueEmail(e.target.value)}
+                  placeholder="ihre@email.de"
+                  className="border rounded-md px-3 py-1.5 text-sm focus:outline-none focus:ring-1 focus:ring-lions-blue w-56" />
+              </div>
+              <div>
+                <label className="block text-xs text-gray-500 mb-1">Telefon</label>
+                <input type="tel" value={neuesTelefon} onChange={e => setNeuesTelefon(e.target.value)}
+                  placeholder="0611 12345"
+                  className="border rounded-md px-3 py-1.5 text-sm focus:outline-none focus:ring-1 focus:ring-lions-blue w-40" />
+              </div>
+              <button onClick={handleProfilSpeichern} disabled={profilLaden || (!neueEmail && !neuesTelefon)}
+                className="px-4 py-1.5 bg-lions-blue text-white text-sm rounded-md hover:bg-blue-900 disabled:opacity-50">
+                {profilLaden ? "…" : "Speichern"}
+              </button>
+            </div>
+          )}
+        </div>
+      )}
+
       {/* Bildschirm-Kopfzeile */}
       <div className="flex items-center justify-between mb-6 print:hidden">
         <h1 className="text-2xl font-bold text-lions-blue">Meine Merkliste</h1>

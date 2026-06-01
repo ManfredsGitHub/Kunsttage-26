@@ -113,6 +113,11 @@ export const getMerkliste = (token: string) =>
 export const merklisteZusenden = (token: string) =>
   req<{ status: string; email: string }>(`/merkliste/zusenden?token=${encodeURIComponent(token)}`, { method: "POST" });
 
+export const merklisteProfilAktualisieren = (token: string, data: { email?: string; telefon?: string }) =>
+  req<{ email: string | null; telefon: string | null }>(`/merkliste/profil?token=${encodeURIComponent(token)}`, {
+    method: "PATCH", body: JSON.stringify(data),
+  });
+
 export const merklisteHinzufuegen = (token: string, bildId: number) =>
   req(`/merkliste/${bildId}?token=${encodeURIComponent(token)}`, { method: "POST" });
 

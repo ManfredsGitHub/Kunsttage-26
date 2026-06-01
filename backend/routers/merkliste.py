@@ -66,6 +66,23 @@ def get_merkliste(token: str, session: Session = Depends(get_session)):
     return {"bilder": result, "email": besucher.email, "telefon": besucher.telefon}
 
 
+class ProfilUpdate(BaseModel):
+    email: Optional[str] = None
+    telefon: Optional[str] = None
+
+
+@router.patch("/profil")
+def profil_aktualisieren(token: str, data: ProfilUpdate, session: Session = Depends(get_session)):
+    besucher = _besucher_by_token(token, session)
+    if data.email is not None:
+        besucher.email = data.email.strip().lower() or None
+    if data.telefon is not None:
+        besucher.telefon = data.telefon.strip() or None
+    session.add(besucher)
+    session.commit()
+    return {"email": besucher.email, "telefon": besucher.telefon}
+
+
 @router.post("/zusenden")
 def merkliste_zusenden(token: str, session: Session = Depends(get_session)):
     besucher = _besucher_by_token(token, session)
