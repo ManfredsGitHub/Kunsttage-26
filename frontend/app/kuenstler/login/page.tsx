@@ -8,10 +8,10 @@ function LoginInner() {
   const params = useSearchParams();
   const router = useRouter();
   const token = params.get("token");
-  const [status, setStatus] = useState<"pruefen" | "ok" | "fehler">("pruefen");
+  const [status, setStatus] = useState<"pruefen" | "ok" | "kein_token" | "fehler">("pruefen");
 
   useEffect(() => {
-    if (!token) { setStatus("fehler"); return; }
+    if (!token) { setStatus("kein_token"); return; }
     verifyToken(token)
       .then(({ kuenstler_id, name }) => {
         localStorage.setItem("kuenstler_id", String(kuenstler_id));
@@ -32,10 +32,19 @@ function LoginInner() {
       </div>
     );
 
+  if (status === "kein_token")
+    return (
+      <div className="bg-blue-50 border border-blue-200 rounded-md p-6 text-center text-blue-800 space-y-2">
+        <p className="font-semibold">Künstler-Portal</p>
+        <p className="text-sm">Der Zugang erfolgt ausschließlich über Ihren persönlichen Einladungslink.</p>
+        <p className="text-sm">Bitte prüfen Sie Ihre E-Mail oder wenden Sie sich an die Veranstaltungsleitung.</p>
+      </div>
+    );
+
   return (
-    <div className="bg-red-50 border border-red-200 rounded-md p-6 text-center text-red-800">
+    <div className="bg-red-50 border border-red-200 rounded-md p-6 text-center text-red-800 space-y-2">
       <p className="font-semibold">Link ungültig oder abgelaufen.</p>
-      <p className="text-sm mt-2">Bitte kontaktieren Sie die Veranstaltungsleitung für einen neuen Link.</p>
+      <p className="text-sm">Der Einladungslink ist 48 Stunden gültig. Bitte kontaktieren Sie die Veranstaltungsleitung für einen neuen Link.</p>
     </div>
   );
 }

@@ -16,7 +16,6 @@ export default function Header() {
           <Link href="/" className="hover:text-lions-gold transition-colors">Galerie</Link>
           <Link href="/kuenstler" className="hover:text-lions-gold transition-colors">Künstler</Link>
           <MerklisteNavLink />
-          <Link href="/kuenstler/login" className="hover:text-lions-gold transition-colors">Künstler-Login</Link>
         </nav>
       </div>
     </header>
