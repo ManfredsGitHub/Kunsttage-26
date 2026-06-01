@@ -29,7 +29,13 @@ export function MerklisteProvider({ children }: { children: ReactNode }) {
     setToken(t);
     setEmail(localStorage.getItem("merkliste_email"));
     getMerkliste(t)
-      .then(data => setIds(new Set(data.bilder.map((b: any) => b.id))))
+      .then(data => {
+        setIds(new Set(data.bilder.map((b: any) => b.id)));
+        if (data.email) {
+          setEmail(data.email);
+          localStorage.setItem("merkliste_email", data.email);
+        }
+      })
       .catch(() => {
         localStorage.removeItem("merkliste_token");
         setToken(null);

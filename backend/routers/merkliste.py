@@ -62,7 +62,7 @@ def get_merkliste(token: str, session: Session = Depends(get_session)):
         if b:
             _ = b.kuenstler  # lazy load relationship
             result.append(BildPublic.model_validate(b))
-    return {"bilder": result}
+    return {"bilder": result, "email": besucher.email, "telefon": besucher.telefon}
 
 
 @router.post("/{bild_id}")

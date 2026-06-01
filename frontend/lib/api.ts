@@ -108,7 +108,7 @@ export const merklisteAnmelden = (email?: string, telefon?: string) =>
   });
 
 export const getMerkliste = (token: string) =>
-  req<{ bilder: Bild[] }>(`/merkliste/?token=${encodeURIComponent(token)}`);
+  req<{ bilder: Bild[]; email: string | null; telefon: string | null }>(`/merkliste/?token=${encodeURIComponent(token)}`);
 
 export const merklisteHinzufuegen = (token: string, bildId: number) =>
   req(`/merkliste/${bildId}?token=${encodeURIComponent(token)}`, { method: "POST" });
