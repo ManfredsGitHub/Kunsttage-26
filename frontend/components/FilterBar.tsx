@@ -46,6 +46,7 @@ export default function FilterBar({ genre, technik, onGenre, onTechnik, kuenstle
 
       <select value={sortierung} onChange={(e) => onSortierung(e.target.value)} className={sel}>
         <option value="">Sortierung: Standard</option>
+        <option value="zufall">Zufällig</option>
         <option value="preis_asc">Preis aufsteigend</option>
         <option value="preis_desc">Preis absteigend</option>
       </select>

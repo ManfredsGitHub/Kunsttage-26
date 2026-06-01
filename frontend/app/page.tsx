@@ -62,7 +62,9 @@ export default function GaleriePage() {
       kuenstler_id: kuenstlerId ? Number(kuenstlerId) : undefined,
     })
       .then(data => {
-        if (sortierung === "preis_asc")
+        if (sortierung === "zufall")
+          data.sort(() => Math.random() - 0.5);
+        else if (sortierung === "preis_asc")
           data.sort((a, b) => (a.verkaufspreis ?? Infinity) - (b.verkaufspreis ?? Infinity));
         else if (sortierung === "preis_desc")
           data.sort((a, b) => (b.verkaufspreis ?? -1) - (a.verkaufspreis ?? -1));
