@@ -12,7 +12,6 @@ export default function KuenstlerListePage() {
     getKuenstler()
       .then((data) => {
         const sichtbar = data
-          .filter((k) => k.kuenstlertyp !== "Eigenbestand")
           .sort((a, b) => a.db_name.localeCompare(b.db_name, "de"));
         setKuenstler(sichtbar);
       })

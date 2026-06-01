@@ -49,10 +49,6 @@ export default function KuenstlerDetailPage() {
           <h1 className="text-3xl font-bold text-lions-blue">
             {kuenstler.db_vorname} {kuenstler.db_name}
           </h1>
-          <p className="text-sm text-gray-400 mt-1">
-            {kuenstler.kuenstlertyp === "VorOrt" ? "Live-Malerei vor Ort" :
-             kuenstler.kuenstlertyp === "Galerie" ? "Kunstausstellung" : ""}
-          </p>
           <div className="flex gap-4 mt-3">
             {kuenstler.db_instagram && (
               <a href={kuenstler.db_instagram} target="_blank" rel="noopener noreferrer"

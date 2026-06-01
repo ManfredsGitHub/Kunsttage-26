@@ -5,7 +5,7 @@ const kacheln = [
   { href: "/admin/import", titel: "CSV / Excel Import", beschreibung: "Galerie-Bilder importieren", icon: "📥" },
   { href: "/admin/kasse", titel: "Vor-Ort-Kasse", beschreibung: "Käufe erfassen & Zahlungen verwalten", icon: "🧾" },
   { href: "/admin/merklisten", titel: "Besucher-Merklisten", beschreibung: "Favoriten & Interesse der Besucher", icon: "♡" },
-  { href: "/admin/kuenstler", titel: "Künstler anlegen", beschreibung: "VorOrt-Künstler registrieren & einladen", icon: "🎨" },
+  { href: "/admin/kuenstler", titel: "Künstler anlegen", beschreibung: "Künstler registrieren & einladen", icon: "🎨" },
 ];
 
 export default function AdminPage() {

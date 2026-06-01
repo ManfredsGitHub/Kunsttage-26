@@ -82,7 +82,7 @@ export default function VeranstaltungPage() {
           </h2>
           <div className="space-y-1">
             <p className="font-semibold text-gray-800 text-lg">Schloss Villa Ludwigshöhe</p>
-            <p className="text-gray-600">Villastr.</p>
+            <p className="text-gray-600">Villastraße 64</p>
             <p className="text-gray-600">67480 Edenkoben</p>
           </div>
 
@@ -102,7 +102,7 @@ export default function VeranstaltungPage() {
           </div>
 
           <a
-            href="https://www.google.com/maps/dir/?api=1&destination=Schloss+Villa+Ludwigsh%C3%B6he%2C+Villastr.%2C+67480+Edenkoben"
+            href="https://www.google.com/maps/dir/?api=1&destination=Schloss+Villa+Ludwigsh%C3%B6he%2C+Villastra%C3%9Fe+64%2C+67480+Edenkoben"
             target="_blank"
             rel="noopener noreferrer"
             className="inline-block mt-2 px-5 py-2 bg-lions-blue text-white text-sm rounded-lg hover:bg-opacity-90 transition-colors"
@@ -116,18 +116,18 @@ export default function VeranstaltungPage() {
       <div className="bg-white rounded-2xl shadow-sm overflow-hidden">
         <div className="px-8 pt-6 pb-4">
           <h2 className="text-xl font-bold text-lions-blue">Lage</h2>
-          <p className="text-gray-500 text-sm mt-1">Schloss Villa Ludwigshöhe, 67480 Edenkoben</p>
+          <p className="text-gray-500 text-sm mt-1">Schloss Villa Ludwigshöhe · Villastraße 64 · 67480 Edenkoben</p>
         </div>
         <iframe
-          title="Lage der Schloss Villa Ludwigshöhe"
-          src="https://www.openstreetmap.org/export/embed.html?bbox=8.0600%2C49.2700%2C8.1050%2C49.2950&layer=mapnik&marker=49.2803%2C8.0831"
+          title="Lage des Schloss Villa Ludwigshöhe"
+          src="https://www.openstreetmap.org/export/embed.html?bbox=8.0800%2C49.2720%2C8.0980%2C49.2810&layer=mapnik&marker=49.2762%2C8.0864"
           width="100%"
           height="420"
           className="border-0"
           loading="lazy"
         />
         <div className="px-8 py-3 text-xs text-gray-400">
-          Karte: © <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer" className="underline">OpenStreetMap</a>-Mitwirkende
+          Karte: © <a href="https://www.openstreetmap.org/?mlat=49.2770&mlon=8.0890#map=17/49.2770/8.0890" target="_blank" rel="noopener noreferrer" className="underline">OpenStreetMap</a>-Mitwirkende
         </div>
       </div>
 
