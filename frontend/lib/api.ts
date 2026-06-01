@@ -38,6 +38,26 @@ export const verifyToken = (token: string) =>
   req<{ kuenstler_id: number; name: string }>(`/kuenstler/login/verify?token=${token}`);
 export const updateProfil = (id: number, daten: Record<string, string>) =>
   req(`/kuenstler/${id}/profil`, { method: "PATCH", body: JSON.stringify(daten) });
+
+export const getKuenstlerBilder = (id: number) =>
+  req<Bild[]>(`/kuenstler/${id}/bilder`);
+
+export const kuenstlerBildEinreichen = (id: number, data: {
+  bildtitel: string; bildtechnik: string; genre: string;
+  breite_rahmen_cm: number; hoehe_rahmen_cm: number;
+  einlieferungspreis?: number; anmerkung_bild?: string;
+}) => req<Bild>(`/kuenstler/${id}/bilder`, { method: "POST", body: JSON.stringify(data) });
+
+export const kuenstlerBildLoeschen = (kuenstlerId: number, bildId: number) =>
+  req(`/kuenstler/${kuenstlerId}/bilder/${bildId}`, { method: "DELETE" });
+
+export async function kuenstlerBildFotoHochladen(kuenstlerId: number, bildId: number, file: File): Promise<{ bild_url_web: string }> {
+  const fd = new FormData();
+  fd.append("file", file);
+  const res = await fetch(`${BASE}/kuenstler/${kuenstlerId}/bilder/${bildId}/foto`, { method: "POST", body: fd });
+  if (!res.ok) throw new Error(await res.text());
+  return res.json();
+}
 export const dsgvoEinwilligung = (id: number) =>
   req(`/kuenstler/${id}/dsgvo`, { method: "PATCH" });
 

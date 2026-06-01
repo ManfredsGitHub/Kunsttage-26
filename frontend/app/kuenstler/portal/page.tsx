@@ -1,8 +1,8 @@
 "use client";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { getKuenstlerById, updateProfil, dsgvoEinwilligung } from "@/lib/api";
-import { Kuenstler } from "@/lib/types";
+import { getKuenstlerById, updateProfil, dsgvoEinwilligung, getKuenstlerBilder, kuenstlerBildEinreichen, kuenstlerBildLoeschen, kuenstlerBildFotoHochladen } from "@/lib/api";
+import { Kuenstler, Bild, Genre } from "@/lib/types";
 
 const API = process.env.NEXT_PUBLIC_API_URL;
 
@@ -142,9 +142,17 @@ export default function KuenstlerPortalPage() {
   const [fehler, setFehler] = useState("");
   const [tab, setTab] = useState<"formular" | "vorschau">("formular");
 
+  // Bilder-State
+  const [bilder, setBilder] = useState<Bild[]>([]);
+  const [showBildForm, setShowBildForm] = useState(false);
+  const [bildForm, setBildForm] = useState({ bildtitel: "", bildtechnik: "", genre: "Landschaft" as Genre, breite_rahmen_cm: "", hoehe_rahmen_cm: "", einlieferungspreis: "", anmerkung_bild: "" });
+  const [bildFehler, setBildFehler] = useState("");
+  const [bildLaden, setBildLaden] = useState(false);
+
   useEffect(() => {
     const id = localStorage.getItem("kuenstler_id");
     if (!id) { router.push("/kuenstler/login"); return; }
+    getKuenstlerBilder(Number(id)).then(setBilder).catch(() => {});
     getKuenstlerById(Number(id)).then((k) => {
       setKuenstler(k);
       setForm({
@@ -183,6 +191,43 @@ export default function KuenstlerPortalPage() {
     } catch (err: any) {
       setFehler(err.message);
     }
+  }
+
+  async function handleBildEinreichen(e: React.FormEvent) {
+    e.preventDefault();
+    if (!kuenstler) return;
+    setBildFehler(""); setBildLaden(true);
+    try {
+      const neuesBild = await kuenstlerBildEinreichen(kuenstler.id, {
+        bildtitel: bildForm.bildtitel,
+        bildtechnik: bildForm.bildtechnik,
+        genre: bildForm.genre,
+        breite_rahmen_cm: Number(bildForm.breite_rahmen_cm) || 0,
+        hoehe_rahmen_cm: Number(bildForm.hoehe_rahmen_cm) || 0,
+        einlieferungspreis: bildForm.einlieferungspreis ? Number(bildForm.einlieferungspreis) : undefined,
+        anmerkung_bild: bildForm.anmerkung_bild || undefined,
+      });
+      setBilder(prev => [...prev, neuesBild]);
+      setBildForm({ bildtitel: "", bildtechnik: "", genre: "Landschaft", breite_rahmen_cm: "", hoehe_rahmen_cm: "", einlieferungspreis: "", anmerkung_bild: "" });
+      setShowBildForm(false);
+    } catch (err: any) { setBildFehler(err.message); }
+    finally { setBildLaden(false); }
+  }
+
+  async function handleBildFoto(bild: Bild, file: File) {
+    if (!kuenstler) return;
+    try {
+      const { bild_url_web } = await kuenstlerBildFotoHochladen(kuenstler.id, bild.id, file);
+      setBilder(prev => prev.map(b => b.id === bild.id ? { ...b, bild_url_web } : b));
+    } catch {}
+  }
+
+  async function handleBildLoeschen(bildId: number) {
+    if (!kuenstler) return;
+    try {
+      await kuenstlerBildLoeschen(kuenstler.id, bildId);
+      setBilder(prev => prev.filter(b => b.id !== bildId));
+    } catch {}
   }
 
   async function handleDsgvo() {
@@ -351,6 +396,125 @@ export default function KuenstlerPortalPage() {
             </div>
           </div>
         </div>
+      </div>
+
+      {/* ---- Bilder-Sektion ---- */}
+      <div className="max-w-7xl mx-auto mt-10 print:hidden">
+        <div className="flex items-center justify-between mb-4">
+          <div>
+            <h2 className="text-xl font-bold text-lions-blue">Meine Bilder</h2>
+            <p className="text-sm text-gray-500">{bilder.length} {bilder.length === 1 ? "Werk" : "Werke"} eingereicht</p>
+          </div>
+          <button onClick={() => setShowBildForm(v => !v)}
+            className="px-4 py-2 bg-lions-blue text-white text-sm font-medium rounded-md hover:bg-blue-900 transition-colors">
+            {showBildForm ? "Abbrechen" : "+ Bild einreichen"}
+          </button>
+        </div>
+
+        {/* Neues-Bild-Formular */}
+        {showBildForm && (
+          <form onSubmit={handleBildEinreichen}
+            className="bg-white rounded-lg shadow p-5 mb-6 space-y-4 border-l-4 border-lions-blue">
+            <h3 className="font-semibold text-gray-700">Neues Bild einreichen</h3>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="col-span-2">
+                <label className="block text-sm font-medium text-gray-700 mb-1">Bildtitel *</label>
+                <input required value={bildForm.bildtitel} onChange={e => setBildForm(f => ({...f, bildtitel: e.target.value}))}
+                  placeholder="Titel des Werks" className="input" />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Technik *</label>
+                <input required value={bildForm.bildtechnik} onChange={e => setBildForm(f => ({...f, bildtechnik: e.target.value}))}
+                  placeholder="z.B. Öl auf Leinwand" className="input" />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Genre *</label>
+                <select required value={bildForm.genre} onChange={e => setBildForm(f => ({...f, genre: e.target.value as Genre}))}
+                  className="input">
+                  {(["Abstrakt","Akt","Landschaft","Menschen","Pfalz","Portrait","Städte","Stilleben","Sonstiges"] as Genre[]).map(g => (
+                    <option key={g} value={g}>{g}</option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Breite mit Rahmen (cm)</label>
+                <input type="number" min="0" value={bildForm.breite_rahmen_cm} onChange={e => setBildForm(f => ({...f, breite_rahmen_cm: e.target.value}))}
+                  placeholder="70" className="input" />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Höhe mit Rahmen (cm)</label>
+                <input type="number" min="0" value={bildForm.hoehe_rahmen_cm} onChange={e => setBildForm(f => ({...f, hoehe_rahmen_cm: e.target.value}))}
+                  placeholder="50" className="input" />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Einlieferungspreis (€)</label>
+                <input type="number" min="0" value={bildForm.einlieferungspreis} onChange={e => setBildForm(f => ({...f, einlieferungspreis: e.target.value}))}
+                  placeholder="500" className="input" />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Anmerkung</label>
+                <input value={bildForm.anmerkung_bild} onChange={e => setBildForm(f => ({...f, anmerkung_bild: e.target.value}))}
+                  placeholder="Optionale Anmerkung" className="input" />
+              </div>
+            </div>
+            {bildFehler && <p className="text-red-600 text-sm">{bildFehler}</p>}
+            <button type="submit" disabled={bildLaden}
+              className="bg-lions-blue text-white px-6 py-2 rounded-md text-sm font-medium hover:bg-blue-900 disabled:opacity-50">
+              {bildLaden ? "Wird eingereicht…" : "Bild einreichen"}
+            </button>
+            <p className="text-xs text-gray-400">Das Foto können Sie nach dem Einreichen hochladen. Das Bild wird erst nach Freigabe durch die Veranstaltungsleitung sichtbar.</p>
+          </form>
+        )}
+
+        {/* Bilder-Liste */}
+        {bilder.length === 0 ? (
+          <p className="text-gray-400 text-sm py-8 text-center">Noch keine Bilder eingereicht.</p>
+        ) : (
+          <div className="space-y-3">
+            {bilder.map(b => (
+              <div key={b.id} className="bg-white rounded-lg shadow-sm border p-4 flex gap-4 items-start">
+                {/* Thumbnail / Foto-Upload */}
+                <label className="w-20 h-20 flex-shrink-0 rounded overflow-hidden bg-gray-100 cursor-pointer relative group">
+                  {b.bild_url_web
+                    ? <img src={`${API}${b.bild_url_web}`} alt={b.bildtitel} className="w-full h-full object-cover" />
+                    : <div className="w-full h-full flex flex-col items-center justify-center text-gray-300 text-xs text-center p-1">
+                        <span className="text-2xl">+</span>Foto
+                      </div>
+                  }
+                  <div className="absolute inset-0 bg-black/30 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-white text-xs">
+                    {b.bild_url_web ? "Ersetzen" : "Hochladen"}
+                  </div>
+                  <input type="file" accept="image/*" className="hidden"
+                    onChange={e => e.target.files?.[0] && handleBildFoto(b, e.target.files[0])} />
+                </label>
+
+                {/* Details */}
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-start justify-between gap-2">
+                    <div>
+                      <p className="font-semibold text-gray-800">{b.bildtitel}</p>
+                      <p className="text-xs text-gray-500 mt-0.5">{b.bildtechnik} · {b.genre} · {b.breite_rahmen_cm > 0 ? `${b.breite_rahmen_cm} × ${b.hoehe_rahmen_cm} cm` : "Maße fehlen"}</p>
+                      <p className="text-xs font-mono text-gray-400 mt-0.5">Nr. {b.bild_nr}</p>
+                      {b.einlieferungspreis && (
+                        <p className="text-xs text-gray-500">Einlieferungspreis: {b.einlieferungspreis} € → Vorschlag: {b.verkaufspreis_vorschlag?.toFixed(0)} €</p>
+                      )}
+                    </div>
+                    <div className="flex items-center gap-2 flex-shrink-0">
+                      <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${b.freigegeben ? "bg-green-100 text-green-700" : "bg-yellow-100 text-yellow-700"}`}>
+                        {b.freigegeben ? "✓ Freigegeben" : "Ausstehend"}
+                      </span>
+                      {!b.freigegeben && (
+                        <button onClick={() => handleBildLoeschen(b.id)}
+                          className="text-gray-300 hover:text-red-400 transition-colors text-lg leading-none"
+                          title="Zurückziehen">×</button>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
 
       {/* Globale Input-Styles */}
