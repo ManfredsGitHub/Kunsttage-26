@@ -14,9 +14,11 @@ interface Props {
   kuenstlerId: string;
   onKuenstler: (v: string) => void;
   kuenstlerOptionen: { id: number; name: string }[];
+  sortierung: string;
+  onSortierung: (v: string) => void;
 }
 
-export default function FilterBar({ genre, technik, onGenre, onTechnik, kuenstlerId, onKuenstler, kuenstlerOptionen }: Props) {
+export default function FilterBar({ genre, technik, onGenre, onTechnik, kuenstlerId, onKuenstler, kuenstlerOptionen, sortierung, onSortierung }: Props) {
   const sel = "border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-lions-blue";
   return (
     <div className="flex flex-wrap gap-3 items-center py-4">
@@ -42,9 +44,15 @@ export default function FilterBar({ genre, technik, onGenre, onTechnik, kuenstle
         className={sel}
       />
 
-      {(genre || technik || kuenstlerId) && (
+      <select value={sortierung} onChange={(e) => onSortierung(e.target.value)} className={sel}>
+        <option value="">Sortierung: Standard</option>
+        <option value="preis_asc">Preis aufsteigend</option>
+        <option value="preis_desc">Preis absteigend</option>
+      </select>
+
+      {(genre || technik || kuenstlerId || sortierung) && (
         <button
-          onClick={() => { onGenre(""); onTechnik(""); onKuenstler(""); }}
+          onClick={() => { onGenre(""); onTechnik(""); onKuenstler(""); onSortierung(""); }}
           className="text-sm text-lions-blue underline"
         >
           Filter zurücksetzen

@@ -13,6 +13,7 @@ export default function GaleriePage() {
   const [genre, setGenre] = useState("");
   const [technik, setTechnik] = useState("");
   const [kuenstlerId, setKuenstlerId] = useState("");
+  const [sortierung, setSortierung] = useState("");
   const [laden, setLaden] = useState(true);
   const [fehler, setFehler] = useState("");
   const [restored, setRestored] = useState(false);
@@ -22,10 +23,11 @@ export default function GaleriePage() {
     try {
       const saved = sessionStorage.getItem(STORAGE_KEY);
       if (saved) {
-        const { genre: g, technik: t, kuenstlerId: k, scrollY } = JSON.parse(saved);
+        const { genre: g, technik: t, kuenstlerId: k, sortierung: s, scrollY } = JSON.parse(saved);
         if (g) setGenre(g);
         if (t) setTechnik(t);
         if (k) setKuenstlerId(k);
+        if (s) setSortierung(s);
         sessionStorage.removeItem(STORAGE_KEY);
         if (scrollY) setTimeout(() => window.scrollTo({ top: scrollY }), 100);
       }
@@ -59,15 +61,21 @@ export default function GaleriePage() {
       technik: technik || undefined,
       kuenstler_id: kuenstlerId ? Number(kuenstlerId) : undefined,
     })
-      .then(setBilder)
+      .then(data => {
+        if (sortierung === "preis_asc")
+          data.sort((a, b) => (a.verkaufspreis ?? Infinity) - (b.verkaufspreis ?? Infinity));
+        else if (sortierung === "preis_desc")
+          data.sort((a, b) => (b.verkaufspreis ?? -1) - (a.verkaufspreis ?? -1));
+        setBilder(data);
+      })
       .catch(() => setFehler("Verbindung zum Server fehlgeschlagen."))
       .finally(() => setLaden(false));
-  }, [genre, technik, kuenstlerId, restored]);
+  }, [genre, technik, kuenstlerId, sortierung, restored]);
 
   function handleBildClick() {
     try {
       sessionStorage.setItem(STORAGE_KEY, JSON.stringify({
-        genre, technik, kuenstlerId, scrollY: window.scrollY,
+        genre, technik, kuenstlerId, sortierung, scrollY: window.scrollY,
       }));
     } catch {}
   }
@@ -83,6 +91,7 @@ export default function GaleriePage() {
         genre={genre} technik={technik} onGenre={setGenre} onTechnik={setTechnik}
         kuenstlerId={kuenstlerId} onKuenstler={setKuenstlerId}
         kuenstlerOptionen={kuenstlerOptionen}
+        sortierung={sortierung} onSortierung={setSortierung}
       />
 
       {fehler && <p className="text-red-600 py-4">{fehler}</p>}
