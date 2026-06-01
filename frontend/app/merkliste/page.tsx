@@ -169,6 +169,7 @@ export default function MerklistePage() {
                     </p>
                   )}
                   <div className="flex flex-wrap gap-x-4 gap-y-0.5 mt-1.5 text-xs text-gray-500">
+                    <span className="font-mono text-gray-400">Nr. {b.bild_nr}</span>
                     <span>{b.bildtechnik}</span>
                     {b.breite_rahmen_cm > 0 && (
                       <span>{b.breite_rahmen_cm} × {b.hoehe_rahmen_cm} cm</span>
@@ -178,8 +179,12 @@ export default function MerklistePage() {
                         {b.verkaufspreis.toFixed(0)} €
                       </span>
                     )}
-                    <span className="text-gray-300">Nr. {b.bild_nr}</span>
                   </div>
+                  {b.anmerkung_bild && (
+                    <p className="mt-1.5 text-xs text-gray-500 italic leading-relaxed">
+                      {b.anmerkung_bild}
+                    </p>
+                  )}
                 </div>
 
                 {/* Entfernen-Button */}

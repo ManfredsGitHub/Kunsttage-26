@@ -85,7 +85,10 @@ def send_merkliste(email: str, bilder: list) -> None:
           <td style="padding:12px 8px;vertical-align:top">
             <strong style="font-size:14px">{b.bildtitel}</strong><br>
             <span style="color:#6b7280;font-size:13px">{kuenstler}</span><br>
-            <span style="color:#9ca3af;font-size:12px">{b.bildtechnik}{" · " + masse if masse else ""} · Nr. {b.bild_nr}</span>
+            <span style="color:#9ca3af;font-size:12px;font-family:monospace">Nr. {b.bild_nr}</span>
+            &nbsp;·&nbsp;
+            <span style="color:#9ca3af;font-size:12px">{b.bildtechnik}{" · " + masse if masse else ""}</span>
+            {"<br><span style='color:#6b7280;font-size:12px;font-style:italic'>" + b.anmerkung_bild + "</span>" if b.anmerkung_bild else ""}
           </td>
           <td style="padding:12px 8px;vertical-align:top;text-align:right;white-space:nowrap">
             {preis}<br>
