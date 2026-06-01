@@ -215,3 +215,21 @@ class MerklisteEintrag(SQLModel, table=True):
     bild_id: int = Field(foreign_key="bild.id")
     hinzugefuegt_am: datetime = Field(default_factory=datetime.utcnow)
     besucher: Optional["Besucher"] = Relationship(back_populates="eintraege")
+
+
+# --- Künstler-Nachrichten ---
+
+class KuenstlerNachricht(SQLModel, table=True):
+    id: Optional[int] = Field(default=None, primary_key=True)
+    betreff: str
+    text: str
+    erstellt_am: datetime = Field(default_factory=datetime.utcnow)
+    gelesen_eintraege: List["KuenstlerNachrichtGelesen"] = Relationship(back_populates="nachricht")
+
+
+class KuenstlerNachrichtGelesen(SQLModel, table=True):
+    id: Optional[int] = Field(default=None, primary_key=True)
+    nachricht_id: int = Field(foreign_key="kuenstlernachricht.id")
+    kuenstler_id: int = Field(foreign_key="kuenstler.id")
+    gelesen_am: datetime = Field(default_factory=datetime.utcnow)
+    nachricht: Optional["KuenstlerNachricht"] = Relationship(back_populates="gelesen_eintraege")

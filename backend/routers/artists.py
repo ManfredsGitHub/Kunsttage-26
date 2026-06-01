@@ -6,7 +6,7 @@ from fastapi import APIRouter, Depends, HTTPException, UploadFile, File
 from sqlmodel import Session, select, func
 from pydantic import BaseModel
 from typing import Optional
-from models import Kuenstler, KuenstlerCreate, KuenstlerPublic, Bild, BildPublic, Genre, Abrechnungsempfaenger
+from models import Kuenstler, KuenstlerCreate, KuenstlerPublic, Bild, BildPublic, Genre, Abrechnungsempfaenger, KuenstlerNachricht, KuenstlerNachrichtGelesen
 from database import get_session
 from services import email_service
 from services.image_service import compress_image, save_image
@@ -211,6 +211,37 @@ def bild_zurueckziehen(kuenstler_id: int, bild_id: int, session: Session = Depen
     session.delete(b)
     session.commit()
     return {"status": "gelöscht"}
+
+
+@router.get("/{kuenstler_id}/nachrichten")
+def kuenstler_nachrichten(kuenstler_id: int, session: Session = Depends(get_session)):
+    session.get(Kuenstler, kuenstler_id) or (_ for _ in ()).throw(HTTPException(404))
+    nachrichten = session.exec(
+        select(KuenstlerNachricht).order_by(KuenstlerNachricht.erstellt_am.desc())
+    ).all()
+    gelesen_ids = set(session.exec(
+        select(KuenstlerNachrichtGelesen.nachricht_id)
+        .where(KuenstlerNachrichtGelesen.kuenstler_id == kuenstler_id)
+    ).all())
+    return [
+        {"id": n.id, "betreff": n.betreff, "text": n.text,
+         "erstellt_am": n.erstellt_am, "gelesen": n.id in gelesen_ids}
+        for n in nachrichten
+    ]
+
+
+@router.post("/{kuenstler_id}/nachrichten/{nachricht_id}/gelesen")
+def nachricht_gelesen(kuenstler_id: int, nachricht_id: int, session: Session = Depends(get_session)):
+    exists = session.exec(
+        select(KuenstlerNachrichtGelesen).where(
+            KuenstlerNachrichtGelesen.kuenstler_id == kuenstler_id,
+            KuenstlerNachrichtGelesen.nachricht_id == nachricht_id,
+        )
+    ).first()
+    if not exists:
+        session.add(KuenstlerNachrichtGelesen(kuenstler_id=kuenstler_id, nachricht_id=nachricht_id))
+        session.commit()
+    return {"status": "ok"}
 
 
 @router.post("/{kuenstler_id}/portrait")

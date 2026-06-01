@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { getKuenstlerById, updateProfil, dsgvoEinwilligung, getKuenstlerBilder, kuenstlerBildEinreichen, kuenstlerBildLoeschen, kuenstlerBildFotoHochladen } from "@/lib/api";
+import { getKuenstlerById, updateProfil, dsgvoEinwilligung, getKuenstlerBilder, kuenstlerBildEinreichen, kuenstlerBildLoeschen, kuenstlerBildFotoHochladen, getKuenstlerNachrichten, nachrichtAlsGelesen } from "@/lib/api";
 import { Kuenstler, Bild, Genre } from "@/lib/types";
 
 const API = process.env.NEXT_PUBLIC_API_URL;
@@ -142,6 +142,11 @@ export default function KuenstlerPortalPage() {
   const [fehler, setFehler] = useState("");
   const [tab, setTab] = useState<"formular" | "vorschau">("formular");
 
+  // Nachrichten-State
+  type Nachricht = { id: number; betreff: string; text: string; erstellt_am: string; gelesen: boolean };
+  const [nachrichten, setNachrichten] = useState<Nachricht[]>([]);
+  const [offeneNachricht, setOffeneNachricht] = useState<number | null>(null);
+
   // Bilder-State
   const [bilder, setBilder] = useState<Bild[]>([]);
   const [showBildForm, setShowBildForm] = useState(false);
@@ -153,6 +158,7 @@ export default function KuenstlerPortalPage() {
     const id = localStorage.getItem("kuenstler_id");
     if (!id) { router.push("/kuenstler/login"); return; }
     getKuenstlerBilder(Number(id)).then(setBilder).catch(() => {});
+    getKuenstlerNachrichten(Number(id)).then(setNachrichten).catch(() => {});
     getKuenstlerById(Number(id)).then((k) => {
       setKuenstler(k);
       setForm({
@@ -266,6 +272,58 @@ export default function KuenstlerPortalPage() {
             Abmelden
           </button>
         </div>
+
+        {/* Nachrichten */}
+        {nachrichten.length > 0 && (() => {
+          const ungelesen = nachrichten.filter(n => !n.gelesen);
+          return (
+            <div className={`mb-6 rounded-lg border ${ungelesen.length > 0 ? "border-lions-blue/40 bg-blue-50" : "border-gray-200 bg-white"} overflow-hidden`}>
+              <div className="px-4 py-3 flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <span className="font-semibold text-gray-800 text-sm">Mitteilungen</span>
+                  {ungelesen.length > 0 && (
+                    <span className="bg-lions-blue text-white text-xs px-2 py-0.5 rounded-full font-bold">
+                      {ungelesen.length} neu
+                    </span>
+                  )}
+                </div>
+              </div>
+              <div className="divide-y">
+                {nachrichten.map(n => (
+                  <div key={n.id}>
+                    <button
+                      onClick={async () => {
+                        const id = Number(localStorage.getItem("kuenstler_id"));
+                        if (!n.gelesen) {
+                          await nachrichtAlsGelesen(id, n.id).catch(() => {});
+                          setNachrichten(prev => prev.map(x => x.id === n.id ? { ...x, gelesen: true } : x));
+                        }
+                        setOffeneNachricht(prev => prev === n.id ? null : n.id);
+                      }}
+                      className="w-full flex items-center justify-between px-4 py-2.5 text-left hover:bg-white/60 transition-colors"
+                    >
+                      <div className="flex items-center gap-2 min-w-0">
+                        {!n.gelesen && <span className="w-2 h-2 rounded-full bg-lions-blue flex-shrink-0" />}
+                        <span className={`text-sm truncate ${!n.gelesen ? "font-semibold text-gray-900" : "text-gray-600"}`}>
+                          {n.betreff}
+                        </span>
+                      </div>
+                      <span className="text-xs text-gray-400 flex-shrink-0 ml-3">
+                        {new Date(n.erstellt_am).toLocaleDateString("de-DE", { day: "2-digit", month: "2-digit", year: "numeric" })}
+                        {" "}{offeneNachricht === n.id ? "▲" : "▼"}
+                      </span>
+                    </button>
+                    {offeneNachricht === n.id && (
+                      <div className="px-4 pb-3 pt-1 bg-white/80 text-sm text-gray-700 whitespace-pre-wrap border-t">
+                        {n.text}
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+          );
+        })()}
 
         <div className="flex items-center justify-between mb-6">
           <div>

@@ -117,6 +117,30 @@ export const merklisten_nachfassen = (betreff: string, text: string) =>
     method: "POST", body: JSON.stringify({ betreff, text }),
   });
 
+export const besucher_newsletter_senden = (betreff: string, text: string) =>
+  req<{ status: string; anzahl: number }>("/admin/newsletter/besucher", {
+    method: "POST", body: JSON.stringify({ betreff, text }),
+  });
+
+export const nachricht_senden = (betreff: string, text: string) =>
+  req<{ id: number; anzahl: number }>("/admin/nachrichten", {
+    method: "POST", body: JSON.stringify({ betreff, text }),
+  });
+
+export const getAlleNachrichten = () =>
+  req<{ id: number; betreff: string; text: string; erstellt_am: string; gelesen: number; gesamt: number }[]>("/admin/nachrichten");
+
+export const getNachrichtUngelesen = (id: number) =>
+  req<{ id: number; name: string; email: string }[]>(`/admin/nachrichten/${id}/ungelesen`);
+
+export const getKuenstlerNachrichten = (kuenstlerId: number) =>
+  req<{ id: number; betreff: string; text: string; erstellt_am: string; gelesen: boolean }[]>(
+    `/kuenstler/${kuenstlerId}/nachrichten`
+  );
+
+export const nachrichtAlsGelesen = (kuenstlerId: number, nachrichtId: number) =>
+  req(`/kuenstler/${kuenstlerId}/nachrichten/${nachrichtId}/gelesen`, { method: "POST" });
+
 export const ausstellungToggle = (id: number, inAusstellung: boolean) =>
   req(`/admin/bilder/${id}/ausstellung?in_ausstellung=${inAusstellung}`, { method: "PATCH" });
 
