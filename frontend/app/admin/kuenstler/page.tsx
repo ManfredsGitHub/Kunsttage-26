@@ -399,6 +399,7 @@ export default function AdminKuenstlerPage() {
   const [showNeu, setShowNeu] = useState(false);
   const [nurMitEmail, setNurMitEmail] = useState(false);
   const [nurAnwesend, setNurAnwesend] = useState(false);
+  const [nurMitBildern, setNurMitBildern] = useState(false);
   const [mitInaktiven, setMitInaktiven] = useState(false);
   const [editNrId, setEditNrId] = useState<number | null>(null);
   const [editNrWert, setEditNrWert] = useState("");
@@ -429,6 +430,7 @@ export default function AdminKuenstlerPage() {
     return kuenstler
       .filter(k => !nurMitEmail || !!k.db_email)
       .filter(k => !nurAnwesend || !!k.vor_ort_anwesend)
+      .filter(k => !nurMitBildern || (bilderByKuenstler[k.id]?.length ?? 0) > 0)
       .filter(k => {
         if (!suche) return true;
         const s = suche.toLowerCase();
@@ -443,7 +445,7 @@ export default function AdminKuenstlerPage() {
         }
         return `${a.db_name}${a.db_vorname}`.localeCompare(`${b.db_name}${b.db_vorname}`);
       });
-  }, [kuenstler, suche, nurMitEmail, nurAnwesend, sortNr]);
+  }, [kuenstler, suche, nurMitEmail, nurAnwesend, nurMitBildern, bilderByKuenstler, sortNr]);
 
   function handleSaved(updated: Kuenstler) {
     setKuenstler(prev => prev.map(k => k.id === updated.id ? { ...k, ...updated } : k));
@@ -582,6 +584,15 @@ export default function AdminKuenstlerPage() {
             className="rounded accent-lions-blue"
           />
           Nur Anwesende
+        </label>
+        <label className="flex items-center gap-2 text-sm text-gray-600 cursor-pointer select-none">
+          <input
+            type="checkbox"
+            checked={nurMitBildern}
+            onChange={e => setNurMitBildern(e.target.checked)}
+            className="rounded accent-lions-blue"
+          />
+          Nur mit Bildern
         </label>
         <label className="flex items-center gap-2 text-sm text-gray-600 cursor-pointer select-none">
           <input
