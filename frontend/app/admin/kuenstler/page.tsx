@@ -81,37 +81,32 @@ function EditModal({ k, onClose, onSaved, onDeleted }: { k: Kuenstler; onClose: 
     finally { setPortalLaden(false); }
   }
 
-  const sep = "border-t pt-4 mt-2";
   const label = "block text-xs font-medium text-gray-600 mb-1";
 
   return (
     <div className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center p-4" onClick={onClose}>
       <div className="bg-white rounded-xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto p-6" onClick={e => e.stopPropagation()}>
-        <div className="flex justify-between items-start mb-4">
-          <div>
-            <h2 className="text-lg font-bold text-gray-800">Künstler bearbeiten</h2>
-            <p className="text-xs text-gray-400 mt-0.5">ID {k.id}</p>
-          </div>
-          <button onClick={onClose} className="text-gray-400 hover:text-gray-600 text-2xl leading-none">×</button>
-        </div>
 
-        <form onSubmit={submit} className="space-y-3">
-
-          {/* Portrait */}
-          <div className="flex items-center gap-4 pb-3 border-b">
+        {/* Kopfzeile */}
+        <div className="flex justify-between items-start mb-5">
+          <div className="flex items-center gap-3">
             {k.portrait_foto
-              ? <img src={`${API}${k.portrait_foto}`} alt="Portrait" className="w-14 h-14 rounded-full object-cover shadow" />
-              : <div className="w-14 h-14 rounded-full bg-lions-blue/10 flex items-center justify-center text-lions-blue font-bold text-lg">
+              ? <img src={`${API}${k.portrait_foto}`} alt="Portrait" className="w-10 h-10 rounded-full object-cover shadow" />
+              : <div className="w-10 h-10 rounded-full bg-lions-blue/10 flex items-center justify-center text-lions-blue font-bold">
                   {(k.db_vorname?.[0] ?? "") + k.db_name[0]}
                 </div>
             }
             <div>
-              <p className="text-xs font-medium text-gray-600 mb-1">Portrait-Foto</p>
-              <input type="file" accept="image/*" onChange={e => setPortraitFile(e.target.files?.[0] ?? null)} className="text-xs text-gray-500" />
+              <h2 className="text-lg font-bold text-gray-800">Künstler bearbeiten</h2>
+              <p className="text-xs text-gray-400">ID {k.id}</p>
             </div>
           </div>
+          <button onClick={onClose} className="text-gray-400 hover:text-gray-600 text-2xl leading-none">×</button>
+        </div>
 
-          {/* Name & Leben */}
+        <form onSubmit={submit} className="space-y-4">
+
+          {/* ── Basis-Daten (immer sichtbar) ── */}
           <div className="grid grid-cols-2 gap-3">
             <div>
               <label className={label}>Nachname *</label>
@@ -144,22 +139,62 @@ function EditModal({ k, onClose, onSaved, onDeleted }: { k: Kuenstler; onClose: 
               </div>
             </div>
             <div className="col-span-2">
-              <label className={label}>Lebensdaten <span className="text-gray-400 font-normal">(z.B. *1981 oder 1902 – 1967)</span></label>
+              <label className={label}>Lebensdaten <span className="text-gray-400 font-normal">(z.B. *1981 oder 1902–1967)</span></label>
               <input value={form.db_leben} onChange={e => setForm({...form, db_leben: e.target.value})} placeholder="*1981" className={inp} />
             </div>
             <div className="col-span-2">
-              <label className={label}>Bezeichnet sich als</label>
-              <input value={form.db_beruf} onChange={e => setForm({...form, db_beruf: e.target.value})} placeholder="z.B. Malerin, Bildhauer, Fotografin…" className={inp} />
+              <label className={label}>Kurzbiografie <span className="text-gray-400 font-normal">(für Bildbeschriftung)</span></label>
+              <textarea rows={2} value={form.db_kommentar} onChange={e => setForm({...form, db_kommentar: e.target.value})}
+                placeholder="Kurzer Text für die Bildbeschriftung…" className={inp} />
+            </div>
+            <div>
+              <label className={label}>E-Mail</label>
+              <input type="email" value={form.db_email} onChange={e => setForm({...form, db_email: e.target.value})} className={inp} />
+            </div>
+            <div>
+              <label className={label}>Telefon</label>
+              <input value={form.db_telefon} onChange={e => setForm({...form, db_telefon: e.target.value})} className={inp} />
             </div>
           </div>
 
-          {/* Vita */}
-          <div className={sep}>
-            <div className="space-y-3">
+          {/* Status & Anwesend-Toggle */}
+          <div className="flex items-center gap-6 border-t pt-3">
+            <label className="flex items-center gap-2 text-sm text-gray-700 cursor-pointer">
+              <input type="checkbox" checked={form.aktiv} onChange={e => setForm({...form, aktiv: e.target.checked})} className="rounded" />
+              Aktiv
+            </label>
+            <label className="flex items-center gap-2 text-sm font-medium text-gray-700 cursor-pointer">
+              <input type="checkbox" checked={form.vor_ort_anwesend} onChange={e => setForm({...form, vor_ort_anwesend: e.target.checked})} className="rounded accent-lions-blue" />
+              <span className={form.vor_ort_anwesend ? "text-lions-blue" : ""}>Vor Ort anwesend</span>
+            </label>
+            {!form.vor_ort_anwesend && (
+              <span className="text-xs text-gray-400">Erweiterte Felder verfügbar wenn anwesend</span>
+            )}
+          </div>
+
+          {/* ── Erweiterte Daten (nur wenn anwesend) ── */}
+          {form.vor_ort_anwesend && (
+            <div className="space-y-4 border-t pt-4">
+              <p className="text-xs font-semibold text-lions-blue uppercase tracking-wide">Vor-Ort-Profil</p>
+
+              {/* Portrait */}
+              <div className="flex items-center gap-4">
+                {k.portrait_foto
+                  ? <img src={`${API}${k.portrait_foto}`} alt="Portrait" className="w-14 h-14 rounded-full object-cover shadow" />
+                  : <div className="w-14 h-14 rounded-full bg-gray-100 flex items-center justify-center text-gray-400 text-lg font-bold">
+                      {(k.db_vorname?.[0] ?? "") + k.db_name[0]}
+                    </div>
+                }
+                <div>
+                  <p className={label}>Portrait-Foto</p>
+                  <input type="file" accept="image/*" onChange={e => setPortraitFile(e.target.files?.[0] ?? null)} className="text-xs text-gray-500" />
+                </div>
+              </div>
+
+              {/* Vita-Texte */}
               <div>
-                <label className={label}>Kurzbiografie <span className="text-gray-400 font-normal">(für Bildbeschriftung)</span></label>
-                <textarea rows={3} value={form.db_kommentar} onChange={e => setForm({...form, db_kommentar: e.target.value})}
-                  placeholder="Kurzer Text, der auf die Bildbeschriftung passt…" className={inp} />
+                <label className={label}>Bezeichnet sich als</label>
+                <input value={form.db_beruf} onChange={e => setForm({...form, db_beruf: e.target.value})} placeholder="z.B. Malerin, Bildhauer, Fotografin…" className={inp} />
               </div>
               <div>
                 <label className={label}>Inspiration / Künstlerische Aussage</label>
@@ -175,66 +210,44 @@ function EditModal({ k, onClose, onSaved, onDeleted }: { k: Kuenstler; onClose: 
                 <textarea rows={3} value={form.db_ausstellungen} onChange={e => setForm({...form, db_ausstellungen: e.target.value})}
                   placeholder={"2023 Kunsttage auf der Ludwigshöhe\n2022 Galerie Musterstadt"} className={inp} />
               </div>
-            </div>
-          </div>
 
-          {/* Kontakt */}
-          <div className={sep}>
-            <div className="grid grid-cols-2 gap-3">
-              <div>
-                <label className={label}>E-Mail</label>
-                <input type="email" value={form.db_email} onChange={e => setForm({...form, db_email: e.target.value})} className={inp} />
+              {/* Adresse & Online */}
+              <div className="grid grid-cols-2 gap-3">
+                <div className="col-span-2">
+                  <label className={label}>Straße</label>
+                  <input value={form.db_adresse} onChange={e => setForm({...form, db_adresse: e.target.value})} className={inp} />
+                </div>
+                <div>
+                  <label className={label}>PLZ</label>
+                  <input value={form.db_plz} onChange={e => setForm({...form, db_plz: e.target.value})} className={inp} />
+                </div>
+                <div>
+                  <label className={label}>Ort</label>
+                  <input value={form.db_ort} onChange={e => setForm({...form, db_ort: e.target.value})} className={inp} />
+                </div>
+                <div>
+                  <label className={label}>Webseite</label>
+                  <input value={form.db_webseite} onChange={e => setForm({...form, db_webseite: e.target.value})} className={inp} />
+                </div>
+                <div>
+                  <label className={label}>Instagram</label>
+                  <input value={form.db_instagram} onChange={e => setForm({...form, db_instagram: e.target.value})} className={inp} />
+                </div>
+                <div className="col-span-2">
+                  <label className={label}>Facebook</label>
+                  <input value={form.db_facebook} onChange={e => setForm({...form, db_facebook: e.target.value})} className={inp} />
+                </div>
               </div>
-              <div>
-                <label className={label}>Telefon</label>
-                <input value={form.db_telefon} onChange={e => setForm({...form, db_telefon: e.target.value})} className={inp} />
-              </div>
-              <div className="col-span-2">
-                <label className={label}>Straße</label>
-                <input value={form.db_adresse} onChange={e => setForm({...form, db_adresse: e.target.value})} className={inp} />
-              </div>
-              <div>
-                <label className={label}>PLZ</label>
-                <input value={form.db_plz} onChange={e => setForm({...form, db_plz: e.target.value})} className={inp} />
-              </div>
-              <div>
-                <label className={label}>Ort</label>
-                <input value={form.db_ort} onChange={e => setForm({...form, db_ort: e.target.value})} className={inp} />
-              </div>
-              <div>
-                <label className={label}>Webseite</label>
-                <input value={form.db_webseite} onChange={e => setForm({...form, db_webseite: e.target.value})} className={inp} />
-              </div>
-              <div>
-                <label className={label}>Instagram</label>
-                <input value={form.db_instagram} onChange={e => setForm({...form, db_instagram: e.target.value})} className={inp} />
-              </div>
-              <div>
-                <label className={label}>Facebook</label>
-                <input value={form.db_facebook} onChange={e => setForm({...form, db_facebook: e.target.value})} className={inp} />
-              </div>
-            </div>
-          </div>
 
-          {/* Status */}
-          <div className={`${sep} flex items-center gap-6`}>
-            <label className="flex items-center gap-2 text-sm text-gray-700">
-              <input type="checkbox" checked={form.aktiv} onChange={e => setForm({...form, aktiv: e.target.checked})} className="rounded" />
-              Aktiv
-            </label>
-            <label className="flex items-center gap-2 text-sm text-gray-700">
-              <input type="checkbox" checked={form.vor_ort_anwesend} onChange={e => setForm({...form, vor_ort_anwesend: e.target.checked})} className="rounded" />
-              Anwesend
-            </label>
-          </div>
-
-          {/* Vita drucken */}
-          {k.vor_ort_anwesend && (
-            <div className="border-t pt-3 flex gap-4">
-              <a href={`/admin/kuenstler/${k.id}/drucken`} target="_blank"
-                className="text-sm text-lions-blue underline hover:text-blue-900">
-                Vita drucken (A4)
-              </a>
+              {/* Vita drucken */}
+              {k.vor_ort_anwesend && (
+                <div className="pt-1">
+                  <a href={`/admin/kuenstler/${k.id}/drucken`} target="_blank"
+                    className="text-sm text-lions-blue underline hover:text-blue-900">
+                    Vita drucken (A4)
+                  </a>
+                </div>
+              )}
             </div>
           )}
 
