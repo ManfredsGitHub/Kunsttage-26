@@ -1,11 +1,16 @@
 import { Bild, Kuenstler, ReservierungCreate, KaufCreate } from "./types";
+import { authHeaders } from "./auth";
 
 const BASE = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
 
 async function req<T>(path: string, init?: RequestInit): Promise<T> {
   const res = await fetch(`${BASE}${path}`, {
-    headers: { "Content-Type": "application/json" },
     ...init,
+    headers: {
+      "Content-Type": "application/json",
+      ...authHeaders(),
+      ...(init?.headers as Record<string, string> ?? {}),
+    },
   });
   if (!res.ok) {
     const err = await res.json().catch(() => ({}));
@@ -163,7 +168,7 @@ export const zusatzFotoLoeschen = (bildId: number, fotoId: number) =>
 export async function zusatzFotoHochladen(bildId: number, file: File): Promise<import("./types").BildFoto> {
   const fd = new FormData();
   fd.append("file", file);
-  const res = await fetch(`${BASE}/admin/bilder/${bildId}/fotos`, { method: "POST", body: fd });
+  const res = await fetch(`${BASE}/admin/bilder/${bildId}/fotos`, { method: "POST", body: fd, headers: authHeaders() });
   if (!res.ok) throw new Error(await res.text());
   return res.json();
 }
@@ -208,7 +213,7 @@ export const merklisteEntfernen = (token: string, bildId: number) =>
 export async function fotoHochladen(bildId: number, file: File): Promise<{ bild_url_web: string }> {
   const fd = new FormData();
   fd.append("file", file);
-  const res = await fetch(`${BASE}/admin/bilder/${bildId}/foto`, { method: "POST", body: fd });
+  const res = await fetch(`${BASE}/admin/bilder/${bildId}/foto`, { method: "POST", body: fd, headers: authHeaders() });
   if (!res.ok) throw new Error(await res.text());
   return res.json();
 }
