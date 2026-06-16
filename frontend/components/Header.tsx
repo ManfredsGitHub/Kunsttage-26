@@ -11,11 +11,18 @@ export default function Header() {
             <span className="text-white"> auf der Ludwigshöhe</span>
           </span>
         </Link>
-        <nav className="flex gap-6 text-sm">
+        <nav className="flex items-center gap-6 text-sm">
           <Link href="/veranstaltung" className="hover:text-lions-gold transition-colors">Veranstaltung</Link>
           <Link href="/" className="hover:text-lions-gold transition-colors">Galerie</Link>
           <Link href="/kuenstler" className="hover:text-lions-gold transition-colors">Künstler</Link>
           <MerklisteNavLink />
+          <Link
+            href="/admin"
+            className="opacity-30 hover:opacity-70 transition-opacity text-xs border border-white/30 rounded px-2 py-1"
+            title="Verwaltung"
+          >
+            ⚙
+          </Link>
         </nav>
       </div>
     </header>

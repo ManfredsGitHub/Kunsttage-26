@@ -20,7 +20,15 @@ export default function KuenstlerListePage() {
 
   return (
     <div>
-      <h1 className="text-3xl font-bold text-lions-blue mb-6">Künstlerinnen & Künstler</h1>
+      <div className="flex items-center justify-between mb-6">
+        <h1 className="text-3xl font-bold text-lions-blue">Künstlerinnen & Künstler</h1>
+        <Link
+          href="/kuenstler/portal"
+          className="text-sm text-lions-blue border border-lions-blue rounded-md px-4 py-2 hover:bg-lions-blue hover:text-white transition-colors"
+        >
+          Künstler-Login
+        </Link>
+      </div>
       {laden ? (
         <p className="text-gray-400 animate-pulse">Laden…</p>
       ) : (
