@@ -229,6 +229,7 @@ class Besucher(SQLModel, table=True):
     telefon: Optional[str] = None
     token: str = Field(unique=True, index=True)
     erstellt_am: datetime = Field(default_factory=datetime.utcnow)
+    email_abgemeldet: bool = Field(default=False)
     eintraege: List["MerklisteEintrag"] = Relationship(back_populates="besucher")
 
 

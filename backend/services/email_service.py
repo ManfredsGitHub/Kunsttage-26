@@ -67,7 +67,16 @@ def send_kaufbestaetigung(email: str, name: str, bildtitel: str, preis: float, z
     )
 
 
-def send_merkliste(email: str, bilder: list) -> None:
+def _abmelde_footer(token: str) -> str:
+    link = f"{BASE_URL}/merkliste/abmelden?token={token}"
+    return f"""
+    <p style="color:#9ca3af;font-size:11px;margin-top:32px;border-top:1px solid #e5e7eb;padding-top:12px">
+      Kunsttage auf der Ludwigshöhe · Lions Club Villa Ludwigshöhe<br>
+      <a href="{link}" style="color:#9ca3af">Von E-Mails abmelden</a>
+    </p>"""
+
+
+def send_merkliste(email: str, bilder: list, token: str = "") -> None:
     zeilen = ""
     for b in bilder:
         kuenstler = ""
@@ -113,31 +122,32 @@ def send_merkliste(email: str, bilder: list) -> None:
           <p style="color:#9ca3af;font-size:12px;margin-top:24px">
             {len(bilder)} {"Werk" if len(bilder) == 1 else "Werke"} gespeichert
           </p>
+          {_abmelde_footer(token) if token else ""}
         </div>
         """,
     )
 
 
-def send_nachfass(betreff: str, text: str, bcc_empfaenger: list[str]):
-    msg = MIMEMultipart("alternative")
-    msg["Subject"] = betreff
-    msg["From"] = SMTP_USER
-    msg["To"] = ADMIN_EMAIL
-    msg["Bcc"] = ", ".join(bcc_empfaenger)
-    html = f"""
-    <div style="font-family:sans-serif;max-width:600px;margin:0 auto">
-      <p style="white-space:pre-line">{text}</p>
-      <p style="color:#9ca3af;font-size:12px;margin-top:32px;border-top:1px solid #e5e7eb;padding-top:12px">
-        Kunsttage auf der Ludwigshöhe · Lions Club Villa Ludwigshöhe
-      </p>
-    </div>
+def send_nachfass(betreff: str, text: str, empfaenger: list[tuple[str, str | None]]):
+    """Sendet individuelle E-Mails mit personalisierten Abmelde-Links.
+    empfaenger: Liste von (email, token_oder_None) Tupeln.
     """
-    msg.attach(MIMEText(html, "html"))
-    alle = [ADMIN_EMAIL] + bcc_empfaenger
     with smtplib.SMTP(SMTP_HOST, SMTP_PORT) as s:
         s.starttls()
         s.login(SMTP_USER, SMTP_PASS)
-        s.sendmail(SMTP_USER, alle, msg.as_string())
+        for email, token in empfaenger:
+            msg = MIMEMultipart("alternative")
+            msg["Subject"] = betreff
+            msg["From"] = SMTP_USER
+            msg["To"] = email
+            html = f"""
+            <div style="font-family:sans-serif;max-width:600px;margin:0 auto">
+              <p style="white-space:pre-line">{text}</p>
+              {_abmelde_footer(token) if token else '<p style="color:#9ca3af;font-size:12px;margin-top:32px;border-top:1px solid #e5e7eb;padding-top:12px">Kunsttage auf der Ludwigshöhe · Lions Club Villa Ludwigshöhe</p>'}
+            </div>
+            """
+            msg.attach(MIMEText(html, "html"))
+            s.sendmail(SMTP_USER, email, msg.as_string())
 
 
 def send_kuenstler_login(email: str, name: str, token: str):

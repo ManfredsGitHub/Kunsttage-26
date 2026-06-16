@@ -100,8 +100,19 @@ def merkliste_zusenden(token: str, session: Session = Depends(get_session)):
     geordnet = [bild_map[e.bild_id] for e in eintraege if e.bild_id in bild_map]
     for b in geordnet:
         _ = b.kuenstler
-    send_merkliste(besucher.email, geordnet)
+    send_merkliste(besucher.email, geordnet, token=besucher.token)
     return {"status": "gesendet", "email": besucher.email}
+
+
+@router.post("/abmelden")
+def abmelden(token: str, session: Session = Depends(get_session)):
+    besucher = session.exec(select(Besucher).where(Besucher.token == token)).first()
+    if not besucher:
+        raise HTTPException(404, "Ungültiger Abmelde-Link")
+    besucher.email_abgemeldet = True
+    session.add(besucher)
+    session.commit()
+    return {"status": "abgemeldet", "email": besucher.email}
 
 
 @router.post("/{bild_id}")

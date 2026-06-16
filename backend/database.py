@@ -23,6 +23,9 @@ def create_db():
         ]:
             if col not in kauf_cols:
                 con.exec_driver_sql(f"ALTER TABLE kauf ADD COLUMN {col} {typ}")
+        besucher_cols = [r[1] for r in con.exec_driver_sql("PRAGMA table_info(besucher)")]
+        if "email_abgemeldet" not in besucher_cols:
+            con.exec_driver_sql("ALTER TABLE besucher ADD COLUMN email_abgemeldet INTEGER DEFAULT 0")
         con.commit()
 
 

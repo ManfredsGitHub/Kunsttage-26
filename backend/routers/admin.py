@@ -474,14 +474,16 @@ class NachfassData(BaseModel):
 
 @router.post("/merklisten/nachfassen")
 def merklisten_nachfassen(data: NachfassData, session: Session = Depends(get_session)):
-    alle_besucher = session.exec(select(Besucher).where(Besucher.email != None)).all()
+    alle_besucher = session.exec(
+        select(Besucher).where(Besucher.email != None, Besucher.email_abgemeldet == False)
+    ).all()
     empfaenger = []
     for b in alle_besucher:
         hat_eintraege = session.exec(
             select(MerklisteEintrag).where(MerklisteEintrag.besucher_id == b.id)
         ).first()
         if hat_eintraege:
-            empfaenger.append(b.email)
+            empfaenger.append((b.email, b.token))
     if not empfaenger:
         raise HTTPException(400, "Keine Empfänger mit Merkliste gefunden")
     from services.email_service import send_nachfass
@@ -493,8 +495,10 @@ def merklisten_nachfassen(data: NachfassData, session: Session = Depends(get_ses
 
 @router.post("/newsletter/besucher")
 def besucher_newsletter(data: NachfassData, session: Session = Depends(get_session)):
-    alle = session.exec(select(Besucher).where(Besucher.email != None)).all()
-    empfaenger = [b.email for b in alle if b.email]
+    alle = session.exec(
+        select(Besucher).where(Besucher.email != None, Besucher.email_abgemeldet == False)
+    ).all()
+    empfaenger = [(b.email, b.token) for b in alle if b.email]
     if not empfaenger:
         raise HTTPException(400, "Keine Besucher mit E-Mail gefunden")
     from services.email_service import send_nachfass
@@ -522,7 +526,7 @@ def nachricht_senden(data: NachrichtData, session: Session = Depends(get_session
             Kuenstler.db_email != None,
         )
     ).all()
-    empfaenger = [k.db_email for k in kuenstler_liste if k.db_email]
+    empfaenger = [(k.db_email, None) for k in kuenstler_liste if k.db_email]
     if empfaenger:
         from services.email_service import send_nachfass
         send_nachfass(data.betreff, data.text, empfaenger)
