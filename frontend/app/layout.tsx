@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import Link from "next/link";
 import Header from "@/components/Header";
 import KeyboardShortcuts from "@/components/KeyboardShortcuts";
 import Providers from "./Providers";
@@ -18,7 +19,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <Header />
           <main className="max-w-6xl mx-auto px-4 py-8">{children}</main>
           <footer className="mt-16 py-6 text-center text-sm text-gray-400 border-t print:hidden">
-            Kunsttage auf der Ludwigshöhe · Eine Benefizveranstaltung der Lions Clubs der Südpfalz · Alle Erlöse für gemeinnützige Zwecke
+            <p>Kunsttage auf der Ludwigshöhe · Eine Benefizveranstaltung der Lions Clubs der Südpfalz · Alle Erlöse für gemeinnützige Zwecke</p>
+            <p className="mt-2">
+              <Link href="/impressum" className="hover:text-gray-600 underline underline-offset-2">Impressum</Link>
+            </p>
           </footer>
         </Providers>
       </body>

@@ -8,7 +8,7 @@ import os
 load_dotenv()
 
 from database import create_db
-from routers import artworks, reservations, sales, artists, admin, merkliste, archive, export, auth as auth_router
+from routers import artworks, reservations, sales, artists, admin, merkliste, archive, export, auth as auth_router, einstellungen
 from services.auth_service import verify_token
 
 app = FastAPI(title="Kunsttage auf der Ludwigshöhe API", version="1.0.0")
@@ -30,11 +30,13 @@ app.include_router(merkliste.router)
 app.include_router(archive.router)
 app.include_router(export.router)
 app.include_router(auth_router.router)
+app.include_router(einstellungen.router)
 
 # ── Auth-Middleware ───────────────────────────────────────────────────────────
 # Pfade, die ohne JWT erreichbar sind
 _OPEN = ("/bilder", "/uploads", "/reservierungen", "/kuenstler",
-         "/merkliste", "/auth", "/docs", "/openapi.json", "/redoc", "/")
+         "/merkliste", "/auth", "/docs", "/openapi.json", "/redoc", "/",
+         "/einstellungen")
 
 
 def _is_open(path: str) -> bool:

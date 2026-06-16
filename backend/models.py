@@ -257,3 +257,10 @@ class KuenstlerNachrichtGelesen(SQLModel, table=True):
     kuenstler_id: int = Field(foreign_key="kuenstler.id")
     gelesen_am: datetime = Field(default_factory=datetime.utcnow)
     nachricht: Optional["KuenstlerNachricht"] = Relationship(back_populates="gelesen_eintraege")
+
+
+# --- Seiteneinstellungen (Key-Value) ---
+
+class Einstellung(SQLModel, table=True):
+    schluessel: str = Field(primary_key=True)
+    wert: str = Field(default="")

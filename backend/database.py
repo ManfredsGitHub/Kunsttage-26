@@ -26,6 +26,7 @@ def create_db():
         besucher_cols = [r[1] for r in con.exec_driver_sql("PRAGMA table_info(besucher)")]
         if "email_abgemeldet" not in besucher_cols:
             con.exec_driver_sql("ALTER TABLE besucher ADD COLUMN email_abgemeldet INTEGER DEFAULT 0")
+        # Einstellung-Tabelle wird durch SQLModel.metadata.create_all angelegt
         con.commit()
 
 
