@@ -1,5 +1,6 @@
 "use client";
 import { useState } from "react";
+import Link from "next/link";
 import { useMerkliste } from "@/lib/MerklisteContext";
 
 export default function AnmeldeModal() {
@@ -79,6 +80,12 @@ export default function AnmeldeModal() {
         </form>
         <p className="text-xs text-gray-400 mt-3 text-center">
           Mit der gleichen E-Mail oder Telefonnummer können Sie Ihre Liste jederzeit wiederherstellen.
+        </p>
+        <p className="text-xs text-gray-400 mt-2 text-center leading-relaxed">
+          Mit der Anmeldung stimmen Sie zu, dass wir Ihre Kontaktdaten für die Merkliste und Benachrichtigungen speichern.{" "}
+          <Link href="/datenschutz" target="_blank" className="underline hover:text-gray-600">
+            Datenschutzerklärung
+          </Link>
         </p>
       </div>
     </div>

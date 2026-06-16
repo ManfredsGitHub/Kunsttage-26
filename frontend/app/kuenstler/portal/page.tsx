@@ -444,9 +444,14 @@ export default function KuenstlerPortalPage() {
 
               {/* DSGVO */}
               <div className="bg-yellow-50 border border-yellow-200 rounded-md p-4">
-                <h3 className="font-semibold text-yellow-800 mb-1 text-sm">DSGVO-Einwilligung</h3>
-                <p className="text-xs text-yellow-700 mb-3">
-                  Ich willige ein, dass meine Daten und Bilder für die Kunsttage auf der Ludwigshöhe 2026 veröffentlicht werden.
+                <h3 className="font-semibold text-yellow-800 mb-1 text-sm">Einwilligung zur Veröffentlichung</h3>
+                <p className="text-xs text-yellow-700 mb-1">
+                  Ich willige ein, dass mein Name, mein Portrait-Foto, meine Vita und die Abbildungen meiner Werke für die
+                  Kunsttage auf der Ludwigshöhe 2026 veröffentlicht werden (Webseite, Katalog, Druckmaterialien).
+                </p>
+                <p className="text-xs text-yellow-600 mb-3">
+                  Die Einwilligung kann jederzeit widerrufen werden.{" "}
+                  <a href="/datenschutz" target="_blank" className="underline">Datenschutzerklärung</a>
                 </p>
                 <button type="button" onClick={handleDsgvo}
                   className="bg-yellow-600 text-white px-4 py-1.5 rounded text-sm hover:bg-yellow-700 transition-colors">
