@@ -84,9 +84,30 @@ export default function GaleriePage() {
 
   return (
     <div>
+      {/* ── Hero ── */}
+      <div className="mb-10 text-center">
+        <h1 aria-label="Kunsttage" className="kunsttage justify-center">
+          <span>K</span>
+          <span>u</span>
+          <span>n</span>
+          <span>s</span>
+          <span>t</span>
+          <span>t</span>
+          <span>a</span>
+          <span>g</span>
+          <span>e</span>
+        </h1>
+        <p
+          className="text-gray-500 mt-2 tracking-widest uppercase text-xs"
+          style={{ fontFamily: "var(--font-cormorant), Georgia, serif", letterSpacing: "0.25em" }}
+        >
+          auf der Ludwigshöhe · 2026
+        </p>
+        <p className="text-gray-400 text-xs mt-1">Schloss Villa Ludwigshöhe · Edenkoben</p>
+      </div>
+
       <div className="mb-6">
-        <h1 className="text-3xl font-bold text-lions-blue">Galerie 2026</h1>
-        <p className="text-gray-500 mt-1">Schloss Villa Ludwigshöhe · Edenkoben</p>
+        <h2 className="text-xl font-semibold text-lions-blue">Galerie</h2>
       </div>
 
       <FilterBar

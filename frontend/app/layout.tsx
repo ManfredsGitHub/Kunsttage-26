@@ -4,6 +4,13 @@ import Link from "next/link";
 import Header from "@/components/Header";
 import KeyboardShortcuts from "@/components/KeyboardShortcuts";
 import Providers from "./Providers";
+import { Cormorant_Garamond } from "next/font/google";
+
+const cormorant = Cormorant_Garamond({
+  subsets: ["latin"],
+  weight: ["300", "400", "600"],
+  variable: "--font-cormorant",
+});
 
 export const metadata: Metadata = {
   title: "Kunsttage auf der Ludwigshöhe 2026",
@@ -12,7 +19,7 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="de">
+    <html lang="de" className={cormorant.variable}>
       <body className="bg-gray-50 min-h-screen">
         <Providers>
           <KeyboardShortcuts />

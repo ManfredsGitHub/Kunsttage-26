@@ -5,10 +5,21 @@ export default function Header() {
   return (
     <header className="bg-lions-blue text-white print:hidden">
       <div className="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between">
-        <Link href="/" className="flex items-center gap-3">
-          <span className="font-bold text-4xl">
-            <span className="text-lions-gold">Kunsttage</span>
-            <span className="text-white"> auf der Ludwigshöhe</span>
+        <Link href="/" className="flex flex-col leading-none" aria-label="Kunsttage auf der Ludwigshöhe">
+          <span className="kunsttage-header">
+            <span>K</span>
+            <span>u</span>
+            <span>n</span>
+            <span>s</span>
+            <span>t</span>
+            <span>t</span>
+            <span>a</span>
+            <span>g</span>
+            <span>e</span>
+          </span>
+          <span className="text-white text-sm tracking-widest uppercase mt-0.5"
+            style={{ fontFamily: "var(--font-cormorant), Georgia, serif" }}>
+            auf der Ludwigshöhe
           </span>
         </Link>
         <nav className="flex items-center gap-6 text-sm">
