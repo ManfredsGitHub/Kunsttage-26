@@ -7,7 +7,10 @@ import { formatBildNr } from "@/lib/utils";
 const API = process.env.NEXT_PUBLIC_API_URL;
 
 // --- Edit Modal ---
+type EditTab = "stamm" | "vita" | "kontakt" | "orga";
+
 function EditModal({ k, onClose, onSaved, onDeleted }: { k: Kuenstler; onClose: () => void; onSaved: (k: Kuenstler) => void; onDeleted: (id: number) => void }) {
+  const [tab, setTab] = useState<EditTab>("stamm");
   const [form, setForm] = useState({
     db_vorname: k.db_vorname ?? "",
     db_name: k.db_name,
@@ -34,13 +37,23 @@ function EditModal({ k, onClose, onSaved, onDeleted }: { k: Kuenstler; onClose: 
   const [alleKuenstler, setAlleKuenstler] = useState<Kuenstler[]>([]);
   useEffect(() => { getAlleKuenstler().then(setAlleKuenstler).catch(() => {}); }, []);
   const [portraitFile, setPortraitFile] = useState<File | null>(null);
+  const [portraitPreview, setPortraitPreview] = useState<string | null>(null);
   const [laden, setLaden] = useState(false);
   const [fehler, setFehler] = useState("");
   const [portalLink, setPortalLink] = useState("");
   const [portalLaden, setPortalLaden] = useState(false);
   const [loeschenLaden, setLoeschenLaden] = useState(false);
   const [loeschenBestaetigung, setLoeschenBestaetigung] = useState(false);
-  const inp = "w-full border rounded-md px-3 py-1.5 text-sm bg-gray-100 focus:outline-none focus:ring-1 focus:ring-lions-blue";
+
+  const inp = "w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-lions-blue/30 focus:border-lions-blue bg-white";
+  const lbl = "block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1";
+  const hint = "text-xs text-gray-400 mt-1";
+
+  function handlePortraitChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0] ?? null;
+    setPortraitFile(file);
+    if (file) setPortraitPreview(URL.createObjectURL(file));
+  }
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
@@ -88,248 +101,308 @@ function EditModal({ k, onClose, onSaved, onDeleted }: { k: Kuenstler; onClose: 
     finally { setPortalLaden(false); }
   }
 
-  const label = "block text-xs font-medium text-gray-600 mb-1";
+  const TABS: { id: EditTab; label: string }[] = [
+    { id: "stamm",   label: "Stammdaten" },
+    { id: "vita",    label: "Vita & Profil" },
+    { id: "kontakt", label: "Kontakt & Web" },
+    { id: "orga",    label: "Organisation" },
+  ];
+
+  const avatarSrc = portraitPreview ?? (k.portrait_foto ? `${API}${k.portrait_foto}` : null);
 
   return (
     <div className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center p-4" onClick={onClose}>
-      <div className="bg-white rounded-xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto p-6" onClick={e => e.stopPropagation()}>
+      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl flex flex-col max-h-[92vh]" onClick={e => e.stopPropagation()}>
 
-        {/* Kopfzeile */}
-        <div className="flex justify-between items-start mb-5">
-          <div className="flex items-center gap-3">
-            {k.portrait_foto
-              ? <img src={`${API}${k.portrait_foto}`} alt="Portrait" className="w-10 h-10 rounded-full object-cover shadow" />
-              : <div className="w-10 h-10 rounded-full bg-lions-blue/10 flex items-center justify-center text-lions-blue font-bold">
+        {/* ── Header ── */}
+        <div className="flex items-center gap-3 px-6 pt-5 pb-4 border-b">
+          <div className="relative">
+            {avatarSrc
+              ? <img src={avatarSrc} alt="Portrait" className="w-11 h-11 rounded-full object-cover shadow" />
+              : <div className="w-11 h-11 rounded-full bg-lions-blue/10 flex items-center justify-center text-lions-blue font-bold text-base">
                   {(k.db_vorname?.[0] ?? "") + k.db_name[0]}
                 </div>
             }
-            <div>
-              <h2 className="text-lg font-bold text-gray-800">Künstler bearbeiten</h2>
-              <p className="text-xs text-gray-400">ID {k.id}</p>
-            </div>
           </div>
-          <button onClick={onClose} className="text-gray-400 hover:text-gray-600 text-2xl leading-none">×</button>
+          <div className="flex-1 min-w-0">
+            <h2 className="text-base font-bold text-gray-800 truncate">
+              {form.db_vorname ? `${form.db_vorname} ${form.db_name}` : form.db_name}
+            </h2>
+            <p className="text-xs text-gray-400">{form.db_beruf || "Künstler·in"}</p>
+          </div>
+          <button onClick={onClose} className="text-gray-400 hover:text-gray-600 text-2xl leading-none ml-2">×</button>
         </div>
 
-        <form onSubmit={submit} className="space-y-4">
+        {/* ── Tab-Nav ── */}
+        <div className="flex border-b px-6 gap-1">
+          {TABS.map(t => (
+            <button key={t.id} type="button" onClick={() => setTab(t.id)}
+              className={`px-4 py-2.5 text-sm font-medium border-b-2 transition-colors -mb-px ${
+                tab === t.id
+                  ? "border-lions-blue text-lions-blue"
+                  : "border-transparent text-gray-500 hover:text-gray-700"
+              }`}>
+              {t.label}
+            </button>
+          ))}
+        </div>
 
-          {/* ── Basis-Daten (immer sichtbar) ── */}
-          <div className="grid grid-cols-2 gap-3">
-            <div>
-              <label className={label}>Nachname *</label>
-              <input required value={form.db_name} onChange={e => setForm({...form, db_name: e.target.value})} className={inp} />
-            </div>
-            <div>
-              <label className={label}>Vorname</label>
-              <input value={form.db_vorname} onChange={e => setForm({...form, db_vorname: e.target.value})} className={inp} />
-            </div>
-            <div className="col-span-2">
-              <label className={label}>
-                Künstlernummer <span className="text-gray-400 font-normal">(KKK — 3 Stellen, für Bildnummer JJKKKNN)</span>
-              </label>
-              <div className="flex items-center gap-2">
-                <input
-                  value={form.kuenstler_nr}
-                  onChange={e => setForm({...form, kuenstler_nr: e.target.value.replace(/\D/g, "").slice(0, 3)})}
-                  placeholder="z.B. 105"
-                  maxLength={3}
-                  className={`w-24 border rounded-md px-3 py-1.5 text-sm font-mono focus:outline-none focus:ring-1 ${
-                    form.kuenstler_nr.length === 3 ? "border-green-400 focus:ring-green-400" :
-                    form.kuenstler_nr.length > 0   ? "border-yellow-400 focus:ring-yellow-400" :
-                                                      "border-red-300 focus:ring-red-300"
-                  }`}
-                />
-                {form.kuenstler_nr.length === 3
-                  ? <span className="text-xs text-green-600">Bildnummern: {formatBildNr(`26${form.kuenstler_nr}01`)}, {formatBildNr(`26${form.kuenstler_nr}02`)} …</span>
-                  : <span className="text-xs text-red-500">Pflicht für automatische Bildnummern</span>
-                }
-              </div>
-            </div>
-            <div className="col-span-2">
-              <label className={label}>Lebensdaten <span className="text-gray-400 font-normal">(z.B. *1981 oder 1902–1967)</span></label>
-              <input value={form.db_leben} onChange={e => setForm({...form, db_leben: e.target.value})} placeholder="*1981" className={inp} />
-            </div>
-            <div className="col-span-2">
-              <label className={label}>Kurzbiografie <span className="text-gray-400 font-normal">(für Bildbeschriftung)</span></label>
-              <textarea rows={2} value={form.db_kommentar} onChange={e => setForm({...form, db_kommentar: e.target.value})}
-                placeholder="Kurzer Text für die Bildbeschriftung…" className={inp} />
-            </div>
-            <div>
-              <label className={label}>E-Mail</label>
-              <input type="email" value={form.db_email} onChange={e => setForm({...form, db_email: e.target.value})} className={inp} />
-            </div>
-            <div>
-              <label className={label}>Telefon</label>
-              <input value={form.db_telefon} onChange={e => setForm({...form, db_telefon: e.target.value})} className={inp} />
-            </div>
-          </div>
+        {/* ── Tab-Inhalte (scrollbar) ── */}
+        <form onSubmit={submit} className="flex flex-col flex-1 min-h-0">
+          <div className="flex-1 overflow-y-auto px-6 py-5 space-y-5">
 
-          {/* Abrechnung */}
-          <div className="border-t pt-3 space-y-2">
-            <div>
-              <label className="block text-xs font-medium text-gray-600 mb-1">Abrechnung über</label>
-              <select value={form.abrechnungsempf} onChange={e => setForm({...form, abrechnungsempf: e.target.value, galerist_id: ""})} className={inp}>
-                <option value="Künstler">Künstler</option>
-                <option value="Galerist">Galerist / Sammler</option>
-                <option value="Lions">Lions</option>
-              </select>
-            </div>
-            {form.abrechnungsempf === "Galerist" && (
-              <div>
-                <label className="block text-xs font-medium text-gray-600 mb-1">Galerist / Sammler auswählen</label>
-                <select value={form.galerist_id} onChange={e => setForm({...form, galerist_id: e.target.value})} className={inp}>
-                  <option value="">— bitte wählen —</option>
-                  {alleKuenstler.filter(a => a.id !== k.id).sort((a, b) => a.db_name.localeCompare(b.db_name)).map(a => (
-                    <option key={a.id} value={a.id}>{a.db_name}, {a.db_vorname}</option>
-                  ))}
-                </select>
-              </div>
-            )}
-          </div>
-
-          {/* Status & Anwesend-Toggle */}
-          <div className="flex items-center gap-6 border-t pt-3">
-            <label className="flex items-center gap-2 text-sm text-gray-700 cursor-pointer">
-              <input type="checkbox" checked={form.aktiv} onChange={e => setForm({...form, aktiv: e.target.checked})} className="rounded" />
-              Aktiv
-            </label>
-            <label className="flex items-center gap-2 text-sm font-medium text-gray-700 cursor-pointer">
-              <input type="checkbox" checked={form.vor_ort_anwesend} onChange={e => setForm({...form, vor_ort_anwesend: e.target.checked})} className="rounded accent-lions-blue" />
-              <span className={form.vor_ort_anwesend ? "text-lions-blue" : ""}>Vor Ort anwesend</span>
-            </label>
-            {!form.vor_ort_anwesend && (
-              <span className="text-xs text-gray-400">Erweiterte Felder verfügbar wenn anwesend</span>
-            )}
-          </div>
-
-          {/* ── Erweiterte Daten (nur wenn anwesend) ── */}
-          {form.vor_ort_anwesend && (
-            <div className="space-y-4 border-t pt-4">
-              <p className="text-xs font-semibold text-lions-blue uppercase tracking-wide">Vor-Ort-Profil</p>
-
-              {/* Portrait */}
-              <div className="flex items-center gap-4">
-                {k.portrait_foto
-                  ? <img src={`${API}${k.portrait_foto}`} alt="Portrait" className="w-14 h-14 rounded-full object-cover shadow" />
-                  : <div className="w-14 h-14 rounded-full bg-gray-100 flex items-center justify-center text-gray-400 text-lg font-bold">
-                      {(k.db_vorname?.[0] ?? "") + k.db_name[0]}
-                    </div>
-                }
-                <div>
-                  <p className={label}>Portrait-Foto</p>
-                  <input type="file" accept="image/*" onChange={e => setPortraitFile(e.target.files?.[0] ?? null)} className="text-xs text-gray-500" />
+            {/* ─── Tab: Stammdaten ─── */}
+            {tab === "stamm" && (
+              <>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className={lbl}>Vorname</label>
+                    <input value={form.db_vorname} onChange={e => setForm({...form, db_vorname: e.target.value})} className={inp} />
+                  </div>
+                  <div>
+                    <label className={lbl}>Nachname *</label>
+                    <input required value={form.db_name} onChange={e => setForm({...form, db_name: e.target.value})} className={inp} />
+                  </div>
                 </div>
-              </div>
 
-              {/* Vita-Texte */}
-              <div>
-                <label className={label}>Bezeichnet sich als</label>
-                <input value={form.db_beruf} onChange={e => setForm({...form, db_beruf: e.target.value})} placeholder="z.B. Malerin, Bildhauer, Fotografin…" className={inp} />
-              </div>
-              <div>
-                <label className={label}>Inspiration / Künstlerische Aussage</label>
-                <textarea rows={3} value={form.db_inspiration} onChange={e => setForm({...form, db_inspiration: e.target.value})} className={inp} />
-              </div>
-              <div>
-                <label className={label}>Leben / Ausbildung / Werdegang</label>
-                <textarea rows={4} value={form.db_lebenstext} onChange={e => setForm({...form, db_lebenstext: e.target.value})}
-                  placeholder="Biografie, Ausbildung, Werdegang als Fließtext…" className={inp} />
-              </div>
-              <div>
-                <label className={label}>Ausstellungen & Auszeichnungen</label>
-                <textarea rows={3} value={form.db_ausstellungen} onChange={e => setForm({...form, db_ausstellungen: e.target.value})}
-                  placeholder={"2023 Kunsttage auf der Ludwigshöhe\n2022 Galerie Musterstadt"} className={inp} />
-              </div>
+                <div>
+                  <label className={lbl}>Lebensdaten</label>
+                  <input value={form.db_leben} onChange={e => setForm({...form, db_leben: e.target.value})}
+                    placeholder="z.B. *1981 oder 1902–1967" className={inp} />
+                  <p className={hint}>Erscheint im Katalog neben dem Namen</p>
+                </div>
 
-              {/* Adresse & Online */}
-              <div className="grid grid-cols-2 gap-3">
-                <div className="col-span-2">
-                  <label className={label}>Straße</label>
+                <div>
+                  <label className={lbl}>Künstlernummer <span className="font-mono normal-case">(KKK)</span></label>
+                  <div className="flex items-center gap-3">
+                    <input
+                      value={form.kuenstler_nr}
+                      onChange={e => setForm({...form, kuenstler_nr: e.target.value.replace(/\D/g, "").slice(0, 3)})}
+                      placeholder="z.B. 105"
+                      maxLength={3}
+                      className={`w-24 border rounded-lg px-3 py-2 text-sm font-mono text-center focus:outline-none focus:ring-2 ${
+                        form.kuenstler_nr.length === 3 ? "border-green-400 focus:ring-green-400/30 bg-green-50" :
+                        form.kuenstler_nr.length > 0   ? "border-yellow-400 focus:ring-yellow-400/30" :
+                                                          "border-red-300 focus:ring-red-300/30"
+                      }`}
+                    />
+                    {form.kuenstler_nr.length === 3
+                      ? <span className="text-xs text-green-600">→ Bildnr. {formatBildNr(`26${form.kuenstler_nr}01`)}, {formatBildNr(`26${form.kuenstler_nr}02`)} …</span>
+                      : <span className="text-xs text-red-500">3 Stellen erforderlich für Bildnummern</span>
+                    }
+                  </div>
+                </div>
+
+                <div>
+                  <label className={lbl}>Kurzbiografie</label>
+                  <textarea rows={2} value={form.db_kommentar} onChange={e => setForm({...form, db_kommentar: e.target.value})}
+                    placeholder="Kurzer Begleittext für Bildbeschriftungen und Katalog…" className={inp} />
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className={lbl}>E-Mail</label>
+                    <input type="email" value={form.db_email} onChange={e => setForm({...form, db_email: e.target.value})} className={inp} />
+                  </div>
+                  <div>
+                    <label className={lbl}>Telefon</label>
+                    <input value={form.db_telefon} onChange={e => setForm({...form, db_telefon: e.target.value})} className={inp} />
+                  </div>
+                </div>
+              </>
+            )}
+
+            {/* ─── Tab: Vita & Profil ─── */}
+            {tab === "vita" && (
+              <>
+                <div className="flex items-center gap-4 p-4 bg-gray-50 rounded-xl">
+                  <div className="relative group cursor-pointer">
+                    {avatarSrc
+                      ? <img src={avatarSrc} alt="Portrait" className="w-16 h-16 rounded-full object-cover shadow" />
+                      : <div className="w-16 h-16 rounded-full bg-lions-blue/10 flex items-center justify-center text-lions-blue font-bold text-xl">
+                          {(k.db_vorname?.[0] ?? "") + k.db_name[0]}
+                        </div>
+                    }
+                    <div className="absolute inset-0 rounded-full bg-black/30 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                      <span className="text-white text-xs">ändern</span>
+                    </div>
+                    <input type="file" accept="image/*" onChange={handlePortraitChange} className="absolute inset-0 opacity-0 cursor-pointer" />
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-gray-700">Portrait-Foto</p>
+                    <p className="text-xs text-gray-400 mt-0.5">Quadratisch, min. 300 × 300 px</p>
+                    {portraitFile && <p className="text-xs text-green-600 mt-0.5">✓ {portraitFile.name}</p>}
+                  </div>
+                </div>
+
+                <div>
+                  <label className={lbl}>Berufsbezeichnung</label>
+                  <input value={form.db_beruf} onChange={e => setForm({...form, db_beruf: e.target.value})}
+                    placeholder="z.B. Malerin, Bildhauer, Fotografin…" className={inp} />
+                  <p className={hint}>Erscheint unter dem Namen auf der Vita</p>
+                </div>
+
+                <div>
+                  <label className={lbl}>Künstlerische Aussage / Inspiration</label>
+                  <textarea rows={4} value={form.db_inspiration} onChange={e => setForm({...form, db_inspiration: e.target.value})}
+                    placeholder="Was bewegt diese Künstlerin / diesen Künstler? Was möchte sie / er ausdrücken?"
+                    className={inp} />
+                </div>
+
+                <div>
+                  <label className={lbl}>Leben & Ausbildung</label>
+                  <textarea rows={4} value={form.db_lebenstext} onChange={e => setForm({...form, db_lebenstext: e.target.value})}
+                    placeholder={"Geburtsort, Ausbildung, Werdegang…"} className={inp} />
+                </div>
+
+                <div>
+                  <label className={lbl}>Ausstellungen & Auszeichnungen</label>
+                  <textarea rows={4} value={form.db_ausstellungen} onChange={e => setForm({...form, db_ausstellungen: e.target.value})}
+                    placeholder={"2023 Kunsttage auf der Ludwigshöhe\n2022 Galerie Musterstadt"} className={inp} />
+                  <p className={hint}>Eine Zeile pro Eintrag — wird als Aufzählung dargestellt</p>
+                </div>
+
+                {k.vor_ort_anwesend && (
+                  <a href={`/admin/kuenstler/${k.id}/drucken`} target="_blank"
+                    className="inline-flex items-center gap-1.5 text-sm text-lions-blue hover:text-blue-900">
+                    ⎙ Vita als A4 drucken
+                  </a>
+                )}
+              </>
+            )}
+
+            {/* ─── Tab: Kontakt & Web ─── */}
+            {tab === "kontakt" && (
+              <>
+                <div>
+                  <label className={lbl}>Straße</label>
                   <input value={form.db_adresse} onChange={e => setForm({...form, db_adresse: e.target.value})} className={inp} />
                 </div>
-                <div>
-                  <label className={label}>PLZ</label>
-                  <input value={form.db_plz} onChange={e => setForm({...form, db_plz: e.target.value})} className={inp} />
+                <div className="grid grid-cols-3 gap-3">
+                  <div>
+                    <label className={lbl}>PLZ</label>
+                    <input value={form.db_plz} onChange={e => setForm({...form, db_plz: e.target.value})} className={inp} />
+                  </div>
+                  <div className="col-span-2">
+                    <label className={lbl}>Ort</label>
+                    <input value={form.db_ort} onChange={e => setForm({...form, db_ort: e.target.value})} className={inp} />
+                  </div>
                 </div>
-                <div>
-                  <label className={label}>Ort</label>
-                  <input value={form.db_ort} onChange={e => setForm({...form, db_ort: e.target.value})} className={inp} />
-                </div>
-                <div>
-                  <label className={label}>Webseite</label>
-                  <input value={form.db_webseite} onChange={e => setForm({...form, db_webseite: e.target.value})} className={inp} />
-                </div>
-                <div>
-                  <label className={label}>Instagram</label>
-                  <input value={form.db_instagram} onChange={e => setForm({...form, db_instagram: e.target.value})} className={inp} />
-                </div>
-                <div className="col-span-2">
-                  <label className={label}>Facebook</label>
-                  <input value={form.db_facebook} onChange={e => setForm({...form, db_facebook: e.target.value})} className={inp} />
-                </div>
-              </div>
 
-              {/* Vita drucken */}
-              {k.vor_ort_anwesend && (
-                <div className="pt-1">
-                  <a href={`/admin/kuenstler/${k.id}/drucken`} target="_blank"
-                    className="text-sm text-lions-blue underline hover:text-blue-900">
-                    Vita drucken (A4)
-                  </a>
-                </div>
-              )}
-            </div>
-          )}
+                <hr className="border-gray-100" />
 
-          {/* Portal-Link */}
-          <div className="border-t pt-3">
-            <button type="button" onClick={handleEinladen} disabled={portalLaden}
-              className="text-sm text-lions-blue underline hover:text-blue-900 disabled:opacity-50">
-              {portalLaden ? "Wird generiert…" : "Portal-Link generieren (48h)"}
-            </button>
-            {portalLink && (
-              <div className="mt-2 flex gap-2">
-                <input readOnly value={portalLink}
-                  className="flex-1 border rounded px-2 py-1 text-xs font-mono text-gray-600 bg-gray-50 focus:outline-none" />
-                <button type="button" onClick={() => navigator.clipboard.writeText(portalLink)}
-                  className="px-3 py-1 text-xs bg-lions-blue text-white rounded hover:bg-blue-900">
-                  Kopieren
-                </button>
-              </div>
+                <div>
+                  <label className={lbl}>Webseite</label>
+                  <input value={form.db_webseite} onChange={e => setForm({...form, db_webseite: e.target.value})}
+                    placeholder="https://www.beispiel.de" className={inp} />
+                </div>
+                <div>
+                  <label className={lbl}>Instagram</label>
+                  <input value={form.db_instagram} onChange={e => setForm({...form, db_instagram: e.target.value})}
+                    placeholder="https://instagram.com/…" className={inp} />
+                </div>
+                <div>
+                  <label className={lbl}>Facebook</label>
+                  <input value={form.db_facebook} onChange={e => setForm({...form, db_facebook: e.target.value})}
+                    placeholder="https://facebook.com/…" className={inp} />
+                </div>
+              </>
+            )}
+
+            {/* ─── Tab: Organisation ─── */}
+            {tab === "orga" && (
+              <>
+                <div className="flex items-center gap-8 p-4 bg-gray-50 rounded-xl">
+                  <label className="flex items-center gap-2.5 cursor-pointer">
+                    <input type="checkbox" checked={form.aktiv} onChange={e => setForm({...form, aktiv: e.target.checked})}
+                      className="w-4 h-4 rounded accent-lions-blue" />
+                    <span className="text-sm font-medium text-gray-700">Aktiv</span>
+                  </label>
+                  <label className="flex items-center gap-2.5 cursor-pointer">
+                    <input type="checkbox" checked={form.vor_ort_anwesend} onChange={e => setForm({...form, vor_ort_anwesend: e.target.checked})}
+                      className="w-4 h-4 rounded accent-lions-blue" />
+                    <span className={`text-sm font-medium ${form.vor_ort_anwesend ? "text-lions-blue" : "text-gray-700"}`}>
+                      Vor Ort anwesend
+                    </span>
+                  </label>
+                </div>
+
+                <hr className="border-gray-100" />
+
+                <div>
+                  <label className={lbl}>Abrechnung über</label>
+                  <select value={form.abrechnungsempf} onChange={e => setForm({...form, abrechnungsempf: e.target.value, galerist_id: ""})} className={inp}>
+                    <option value="Künstler">Direkt an Künstler·in</option>
+                    <option value="Galerist">Über Galerist / Sammler</option>
+                    <option value="Lions">Lions (Spende)</option>
+                  </select>
+                </div>
+                {form.abrechnungsempf === "Galerist" && (
+                  <div>
+                    <label className={lbl}>Galerist / Sammler</label>
+                    <select value={form.galerist_id} onChange={e => setForm({...form, galerist_id: e.target.value})} className={inp}>
+                      <option value="">— bitte wählen —</option>
+                      {alleKuenstler.filter(a => a.id !== k.id).sort((a, b) => a.db_name.localeCompare(b.db_name)).map(a => (
+                        <option key={a.id} value={a.id}>{a.db_name}, {a.db_vorname}</option>
+                      ))}
+                    </select>
+                  </div>
+                )}
+
+                <hr className="border-gray-100" />
+
+                <div>
+                  <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">Künstler-Portal</p>
+                  <button type="button" onClick={handleEinladen} disabled={portalLaden}
+                    className="px-4 py-2 text-sm border border-lions-blue text-lions-blue rounded-lg hover:bg-lions-blue hover:text-white transition-colors disabled:opacity-50">
+                    {portalLaden ? "Wird generiert…" : "Login-Link generieren (48 h)"}
+                  </button>
+                  <p className="text-xs text-gray-400 mt-1.5">Link per E-Mail oder WhatsApp weitergeben. Gültig 48 Stunden.</p>
+                  {portalLink && (
+                    <div className="mt-3 flex gap-2">
+                      <input readOnly value={portalLink}
+                        className="flex-1 border rounded-lg px-3 py-1.5 text-xs font-mono text-gray-600 bg-gray-50 focus:outline-none" />
+                      <button type="button" onClick={() => navigator.clipboard.writeText(portalLink)}
+                        className="px-3 py-1.5 text-xs bg-lions-blue text-white rounded-lg hover:bg-blue-900">
+                        Kopieren
+                      </button>
+                    </div>
+                  )}
+                </div>
+              </>
             )}
           </div>
 
-          {fehler && <p className="text-red-600 text-sm">{fehler}</p>}
-          <div className="flex justify-between items-center pt-2 border-t">
+          {/* ── Footer ── */}
+          <div className="px-6 py-4 border-t bg-gray-50 rounded-b-2xl flex justify-between items-center gap-3">
             <div>
               {!loeschenBestaetigung
                 ? <button type="button" onClick={() => setLoeschenBestaetigung(true)}
-                    className="text-sm text-red-500 hover:text-red-700 underline">
-                    Künstler löschen
+                    className="text-sm text-red-400 hover:text-red-600">
+                    Löschen
                   </button>
                 : <div className="flex items-center gap-2">
                     <span className="text-sm text-red-600 font-medium">Wirklich löschen?</span>
                     <button type="button" disabled={loeschenLaden} onClick={async () => {
                       setLoeschenLaden(true); setFehler("");
-                      try {
-                        await kuenstlerLoeschen(k.id);
-                        onDeleted(k.id);
-                      } catch (err: any) { setFehler(err.message); setLoeschenBestaetigung(false); }
+                      try { await kuenstlerLoeschen(k.id); onDeleted(k.id); }
+                      catch (err: any) { setFehler(err.message); setLoeschenBestaetigung(false); }
                       finally { setLoeschenLaden(false); }
-                    }} className="px-3 py-1 text-xs bg-red-600 text-white rounded hover:bg-red-700 disabled:opacity-50">
+                    }} className="px-3 py-1 text-xs bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:opacity-50">
                       {loeschenLaden ? "…" : "Ja, löschen"}
                     </button>
                     <button type="button" onClick={() => setLoeschenBestaetigung(false)}
-                      className="px-3 py-1 text-xs border rounded hover:bg-gray-50">
+                      className="px-3 py-1 text-xs border rounded-lg hover:bg-white">
                       Abbrechen
                     </button>
                   </div>
               }
+              {fehler && <p className="text-red-600 text-xs mt-1">{fehler}</p>}
             </div>
-            <div className="flex gap-3">
-              <button type="button" onClick={onClose} className="px-4 py-2 text-sm text-gray-600 border rounded-md hover:bg-gray-50">Abbrechen</button>
-              <button type="submit" disabled={laden} className="px-4 py-2 text-sm bg-lions-blue text-white rounded-md hover:bg-blue-900 disabled:opacity-50">
-                {laden ? "Wird gespeichert…" : "Speichern"}
+            <div className="flex gap-2">
+              <button type="button" onClick={onClose} className="px-4 py-2 text-sm text-gray-600 border rounded-lg hover:bg-white">Abbrechen</button>
+              <button type="submit" disabled={laden} className="px-5 py-2 text-sm bg-lions-blue text-white rounded-lg hover:bg-blue-900 disabled:opacity-50 font-medium">
+                {laden ? "Speichern…" : "Speichern"}
               </button>
             </div>
           </div>
