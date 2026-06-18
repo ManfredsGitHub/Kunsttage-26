@@ -82,30 +82,64 @@ export default function GaleriePage() {
     } catch {}
   }
 
+  function scrollToGalerie() {
+    document.getElementById("galerie")?.scrollIntoView({ behavior: "smooth" });
+  }
+
   return (
     <div>
       {/* ── Hero ── */}
-      <div className="mb-10 text-center">
-        <h1 aria-label="Kunsttage auf der Ludwigshöhe 2026" className="kunsttage justify-center">
-          <span>K</span>
-          <span>u</span>
-          <span>n</span>
-          <span>s</span>
-          <span>t</span>
-          <span>t</span>
-          <span>a</span>
-          <span>g</span>
-          <span>e</span>
-        </h1>
-        <p
-          className="text-gray-500 mt-2 text-xs tracking-[0.2em] uppercase"
-          style={{ fontFamily: "var(--font-cormorant), Georgia, serif" }}
-        >
-          auf der Ludwigshöhe · 2026 · Schloss Villa Ludwigshöhe · Edenkoben
-        </p>
+      <div className="relative rounded-2xl overflow-hidden mb-8 h-56 sm:h-72 md:h-80">
+        <img
+          src="/villa.jpg"
+          alt="Säulengang der Schloss Villa Ludwigshöhe"
+          className="w-full h-full object-cover object-center"
+          fetchPriority="high"
+        />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/35 to-transparent" />
+        <div className="absolute inset-0 flex flex-col items-center justify-end pb-6 sm:pb-8 px-4 text-center">
+          <p className="text-lions-gold font-semibold uppercase tracking-widest text-xs sm:text-sm mb-1">
+            14. Kunsttage auf der Ludwigshöhe
+          </p>
+          <h1 className="text-3xl sm:text-4xl font-bold text-white">
+            Kunst für einen guten Zweck
+          </h1>
+          <p className="text-gray-300 text-sm mt-1.5">
+            17. &amp; 18. Oktober 2026 · Schloss Villa Ludwigshöhe ·{" "}
+            <span className="text-white font-medium">Eintritt frei</span>
+          </p>
+          <div className="flex gap-3 mt-4">
+            <button
+              onClick={scrollToGalerie}
+              className="bg-lions-gold text-lions-blue font-semibold text-sm px-5 py-2 rounded-lg hover:opacity-90 transition-opacity"
+            >
+              Bilder entdecken →
+            </button>
+            <a
+              href="/veranstaltung"
+              className="text-white text-sm px-4 py-2 rounded-lg border border-white/40 hover:bg-white/10 transition-colors"
+            >
+              Zur Veranstaltung ↗
+            </a>
+          </div>
+        </div>
       </div>
 
-      <div className="mb-6">
+      {/* ── Stats ── */}
+      <div className="grid grid-cols-3 gap-3 sm:gap-4 mb-8">
+        {[
+          { zahl: "14", label: "Jahre Kunsttage" },
+          { zahl: ">100.000 €", label: "für gute Zwecke" },
+          { zahl: "5", label: "Lions Clubs Südpfalz" },
+        ].map(({ zahl, label }) => (
+          <div key={label} className="bg-white rounded-xl shadow-sm p-4 text-center">
+            <p className="text-xl sm:text-2xl font-bold text-lions-blue">{zahl}</p>
+            <p className="text-xs text-gray-500 mt-1 leading-tight">{label}</p>
+          </div>
+        ))}
+      </div>
+
+      <div id="galerie" className="mb-6">
         <h2 className="text-xl font-semibold text-lions-blue">Galerie</h2>
       </div>
 

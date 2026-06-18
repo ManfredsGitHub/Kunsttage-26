@@ -55,8 +55,13 @@ export default function BildCard({ bild }: { bild: Bild }) {
             ) : null;
           })()}
         </div>
-        <div className="absolute bottom-3 right-3" onClick={e => e.stopPropagation()}>
-          <MerklistenButton bildId={bild.id} />
+        <div
+          className="absolute bottom-3 right-3 md:opacity-0 md:group-hover:opacity-100 transition-opacity duration-200"
+          onClick={e => e.stopPropagation()}
+        >
+          <div className="bg-white/90 rounded-full shadow-sm p-1">
+            <MerklistenButton bildId={bild.id} />
+          </div>
         </div>
       </div>
     </Link>
