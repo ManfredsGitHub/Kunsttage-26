@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Image from "next/image";
 
 export const metadata: Metadata = {
-  title: "Veranstaltung",
+  title: { absolute: "Kunsttage auf der Ludwigshöhe 2026" },
   description:
     "Kunsttage auf der Ludwigshöhe 2026 – Schloss Villa Ludwigshöhe, Edenkoben – 17. und 18. Oktober 2026. Eintritt frei. Kunst für einen guten Zweck.",
   openGraph: {

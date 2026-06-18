@@ -6,19 +6,8 @@ export default function Header() {
     <header className="bg-lions-blue text-white print:hidden">
       <div className="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between">
         <Link href="/" className="flex items-baseline gap-3" aria-label="Kunsttage auf der Ludwigshöhe">
-          <span className="kunsttage-header">
-            <span>K</span>
-            <span>u</span>
-            <span>n</span>
-            <span>s</span>
-            <span>t</span>
-            <span>t</span>
-            <span>a</span>
-            <span>g</span>
-            <span>e</span>
-          </span>
-          <span className="text-white text-base tracking-widest uppercase"
-            style={{ fontFamily: "var(--font-cormorant), Georgia, serif", fontWeight: 700 }}>
+          <span className="kunsttage-header">Kunsttage</span>
+          <span className="text-white text-base tracking-widest uppercase font-bold">
             auf der Ludwigshöhe
           </span>
         </Link>

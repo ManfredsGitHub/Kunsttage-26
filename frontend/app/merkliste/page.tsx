@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useMerkliste } from "@/lib/MerklisteContext";
 import { getMerkliste, merklisteZusenden } from "@/lib/api";
-import { formatBildNr } from "@/lib/utils";
+import { formatBildNr, bildAlt } from "@/lib/utils";
 import { Bild } from "@/lib/types";
 
 const API = process.env.NEXT_PUBLIC_API_URL;
@@ -191,7 +191,7 @@ export default function MerklistePage() {
                 {/* Thumbnail */}
                 <div className="w-20 flex-shrink-0 rounded overflow-hidden bg-gray-100 print:w-16">
                   {b.bild_url_web ? (
-                    <img src={`${API}${b.bild_url_web}`} alt={b.bildtitel}
+                    <img src={`${API}${b.bild_url_web}`} alt={bildAlt(b)}
                       className="w-full h-auto block" />
                   ) : (
                     <div className="w-20 h-20 flex items-center justify-center text-gray-300 text-xs">—</div>

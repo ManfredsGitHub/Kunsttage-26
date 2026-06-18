@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { getBild, reservieren, getBildFotosPublic } from "@/lib/api";
 import { Bild, BildFoto } from "@/lib/types";
-import { formatBildNr } from "@/lib/utils";
+import { formatBildNr, bildAlt } from "@/lib/utils";
 import MerklistenButton from "@/components/MerklistenButton";
 
 const API = process.env.NEXT_PUBLIC_API_URL;
@@ -158,7 +158,7 @@ export default function BildDetailClient({ id }: { id: string }) {
             >
               <img
                 src={imgSrc}
-                alt={bild.bildtitel}
+                alt={bildAlt(bild)}
                 className="max-w-full max-h-full object-contain select-none"
                 onError={(e) => { (e.target as HTMLImageElement).src = "/placeholder.jpg"; }}
               />
@@ -166,7 +166,7 @@ export default function BildDetailClient({ id }: { id: string }) {
           )}
           <img
             src={imgSrc}
-            alt={bild.bildtitel}
+            alt={bildAlt(bild)}
             className="w-full rounded-lg shadow-lg object-contain max-h-[600px] cursor-zoom-in"
             onClick={() => setLightbox(true)}
             onError={(e) => { (e.target as HTMLImageElement).src = "/placeholder.jpg"; }}
@@ -204,7 +204,7 @@ export default function BildDetailClient({ id }: { id: string }) {
                 {bild.kuenstler.portrait_foto ? (
                   <img
                     src={`${API}${bild.kuenstler.portrait_foto}`}
-                    alt="Portrait"
+                    alt={`Portrait ${bild.kuenstler.db_vorname ?? ""} ${bild.kuenstler.db_name ?? ""}`.trim()}
                     className="w-12 h-12 rounded-full object-cover flex-shrink-0 mt-0.5 shadow"
                   />
                 ) : (

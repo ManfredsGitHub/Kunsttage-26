@@ -2,6 +2,7 @@
 import Link from "next/link";
 import { Bild } from "@/lib/types";
 import MerklistenButton from "./MerklistenButton";
+import { bildAlt } from "@/lib/utils";
 
 const statusColors: Record<string, string> = {
   "Verfügbar": "bg-green-100 text-green-800",
@@ -20,7 +21,7 @@ export default function BildCard({ bild }: { bild: Bild }) {
         <div className="relative aspect-[4/3] bg-gray-100">
           <img
             src={imgSrc}
-            alt={bild.bildtitel}
+            alt={bildAlt(bild)}
             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
             onError={(e) => { (e.target as HTMLImageElement).src = "/placeholder.jpg"; }}
           />
