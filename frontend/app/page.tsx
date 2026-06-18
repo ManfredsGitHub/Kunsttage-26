@@ -116,6 +116,11 @@ export default function GaleriePage() {
         sortierung={sortierung} onSortierung={setSortierung}
       />
 
+      <div className="mt-4 mb-1 flex items-center gap-2 text-xs text-lions-blue/70 bg-lions-blue/5 rounded-md px-3 py-2">
+        <span aria-hidden="true" className="text-sm">♡</span>
+        <span>Bilder vormerken — bei der Veranstaltung gezielt danach suchen</span>
+      </div>
+
       {fehler && <p className="text-red-600 py-4">{fehler}</p>}
 
       {laden ? (
