@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useRef, useState, useCallback } from "react";
-import { getAllePlaetze, platzZuweisen, getAlleKuenstler } from "@/lib/api";
-import type { Platz, Kuenstler } from "@/lib/types";
+import { getAllePlaetze, platzZuweisen, getAlleKuenstler, getRaumplan } from "@/lib/api";
+import type { Platz, Kuenstler, Raumzuteilung } from "@/lib/types";
 
 const RAUM_REIHENFOLGE = [
   "Raum gemeinsam",
@@ -14,6 +14,38 @@ const RAUM_REIHENFOLGE = [
   "Flur 2",
   "Mohr",
 ];
+
+// Zuordnung Platz-Raumname → Raumnummern im Raumplan
+const RAUM_NR_MAP: Record<string, string[]> = {
+  "Raum gemeinsam":      ["43", "48", "49"],
+  "Raum Anweiler":       ["44"],
+  "Raum Bad Bergzabern": ["45"],
+  "Raum Edenkoben":      ["46"],
+  "Raum Germersheim":    ["47"],
+  "Raum Sonstiges":      [],
+  "Raum Fundus":         ["42"],
+  "Flur 2":              ["Flur2"],
+  "Mohr":                ["Flur"],
+};
+
+function raumLabel(raum: string, raumplan: Raumzuteilung[]): string {
+  const nrn = RAUM_NR_MAP[raum] ?? [];
+  if (nrn.length === 0) return raum;
+
+  const nummern = nrn.map(nr => {
+    if (nr === "Flur") return "Hauptflur";
+    if (nr === "Flur2") return "Flur 2";
+    return `Raum ${nr}`;
+  }).join(" / ");
+
+  const clubs = [...new Set(
+    nrn
+      .map(nr => raumplan.find(r => r.raum_nr === nr)?.belegt_durch)
+      .filter((v): v is string => Boolean(v))
+  )];
+
+  return clubs.length > 0 ? `${nummern} – ${clubs.join(", ")}` : nummern;
+}
 
 const KAT_COLORS: Record<number, string> = {
   1: "bg-blue-50 border-blue-300 hover:border-blue-500",
@@ -154,14 +186,15 @@ function PlatzKarte({ platz, kuenstler, isSelected, isSaving, onSelect, onZuweis
 export default function AdminPlaetzePage() {
   const [plaetze, setPlaetze] = useState<Platz[]>([]);
   const [kuenstler, setKuenstler] = useState<Kuenstler[]>([]);
+  const [raumplan, setRaumplan] = useState<Raumzuteilung[]>([]);
   const [laden, setLaden] = useState(true);
   const [selectedId, setSelectedId] = useState<number | null>(null);
   const [saving, setSaving] = useState<number | null>(null);
   const [fehler, setFehler] = useState<string | null>(null);
 
   useEffect(() => {
-    Promise.all([getAllePlaetze(), getAlleKuenstler(true)])
-      .then(([ps, ks]) => { setPlaetze(ps); setKuenstler(ks); })
+    Promise.all([getAllePlaetze(), getAlleKuenstler(true), getRaumplan()])
+      .then(([ps, ks, rp]) => { setPlaetze(ps); setKuenstler(ks); setRaumplan(rp); })
       .catch(e => setFehler(e.message))
       .finally(() => setLaden(false));
   }, []);
@@ -227,7 +260,7 @@ export default function AdminPlaetzePage() {
         return (
           <div key={raum} className="bg-white rounded-lg shadow-sm border overflow-hidden">
             <div className="bg-lions-blue/5 border-b border-lions-blue/10 px-4 py-2 flex justify-between items-center">
-              <h2 className="font-semibold text-gray-800 text-sm">{raum}</h2>
+              <h2 className="font-semibold text-gray-800 text-sm">{raumLabel(raum, raumplan)}</h2>
               <span className="text-xs text-gray-400">
                 {belegtInRaum}/{raumPlaetze.length} belegt
               </span>
