@@ -71,7 +71,7 @@ Jede Künstlerin, jeder Künstler hat ein eigenes Publikum. Wenn 20 Teilnehmende
 ### Was die Künstler bekommen
 Für jeden Teilnehmenden vorbereiten:
 - Direktlink zur eigenen Bildseite im Katalog
-- 2–3 Textvorlagen zum Anpassen (Instagram, Facebook, WhatsApp-Status)
+- 2–3 Textvorlagen zum Anpassen (Instagram, Facebook, WhatsApp-Status, Pinterest)
 - 1 Bild-Quadrat (1:1) mit Rahmen und Kunsttage-Logo zum Teilen
 - Kurze Briefing-Mail mit Timing-Plan
 
@@ -86,6 +86,58 @@ Für jeden Teilnehmenden vorbereiten:
 **Vorlage C — Event-Woche:**
 > „Noch [X] Tage bis zu den Kunsttagen auf der Ludwigshöhe! Ich freue mich auf euch — 17. & 18. Oktober, Schloss Villa Ludwigshöhe, Eintritt frei. [Link zum Katalog]"
 
+**Vorlage D — Pinterest (einmalig, nach Account-Erstellung):**
+> Pin-Beschreibung: „[Bildtitel] · [Technik] · [Künstlername] · Kunsttage auf der Ludwigshöhe 2026 · 17. & 18. Oktober · Eintritt frei · Jetzt im Online-Katalog entdecken"
+> Board-Name: „Meine Kunst" oder „[Künstlername] — Werke"
+
+---
+
+## Pinterest als Langzeit-Kanal
+
+### Strategie
+
+Pinterest wird nicht als kurzlebiger Social-Media-Kanal genutzt, sondern als **dauerhafter Suchkanal** — Pins bleiben monatelang, teils jahrelang auffindbar und werden von Google indexiert. Für eine Benefiz-Kunstausstellung, die jedes Jahr stattfindet, ist das ein wachsender Vorteil.
+
+**Umsetzung:**
+- Kunsttage-Pinterest-Account (Business-Account, kostenlos) einrichten
+- Board: „Kunsttage auf der Ludwigshöhe 2026" mit allen ausgestellten Werken
+- Jeder Pin verlinkt direkt auf die Bildseite im Online-Katalog
+- Künstler werden gebeten, die Pins auf ihre eigenen Boards zu teilen (s. unten)
+
+### Warum Künstler einen eigenen Pinterest-Account anlegen sollten
+
+Die meisten Künstlerinnen und Künstler haben bisher keinen Pinterest-Account. Das folgende Argument sollte im Briefing-Paket enthalten sein:
+
+---
+
+**An die teilnehmenden Künstlerinnen und Künstler:**
+
+Pinterest klingt nach einem weiteren sozialen Netzwerk — ist es aber nicht. Es ist eine **visuelle Suchmaschine**, die von Millionen Menschen genutzt wird, um Kunst zum Kaufen zu finden, Bilder für Wohnräume zu entdecken und Künstler kennenzulernen. Und im Gegensatz zu Instagram, wo ein Post nach 24 Stunden unsichtbar ist, **bleibt ein Pin auf Pinterest jahrelang auffindbar**.
+
+**Was das für Sie bedeutet:**
+
+Ein Pinterest-Account ist in fünf Minuten eingerichtet — Sie brauchen nur eine E-Mail-Adresse. Dann speichern Sie Ihre Werke aus dem Kunsttage-Katalog (wir bereiten alles vor, Sie klicken nur) auf Ihrem eigenen Board. Das hat drei konkrete Vorteile:
+
+1. **Kostenlose Online-Galerie, die bei Google erscheint.**
+   Pinterest-Boards werden von Google indexiert. Wer nach Ihrem Namen sucht, findet künftig auch Ihre Werke — ohne eigene Website, ohne technischen Aufwand.
+
+2. **Kunstkäufer suchen aktiv auf Pinterest.**
+   Menschen, die ein Bild für ihr Zuhause suchen, nutzen Pinterest gezielt zur Inspiration. Ihre Werke können dabei auftauchen — nicht als Werbung, sondern weil jemand danach sucht.
+
+3. **Einmal einrichten, dauerhaft profitieren.**
+   Sie posten kein Pinterest-Tagebuch. Sie legen einmalig ein Board an, pinnen Ihre Kunsttage-Werke — und das war es. Der Pin arbeitet still für Sie, während Sie malen.
+
+**Was wir vorbereiten:** Alle Werkbilder mit fertiger Beschreibung, direktem Link zur Katalogseite und Anleitung zum Pinnen in drei Schritten. Aufwand für Sie: ca. 10 Minuten einmalig.
+
+---
+
+### Zeitplan Pinterest
+
+- **August:** Kunsttage Business-Account einrichten, Board anlegen
+- **September (Katalog live):** Alle Werke pinnen, Künstler-Briefing mit Pinterest-Anleitung versenden
+- **Oktober (Event-Woche):** Künstler teilen Kunsttage-Pins auf ihre eigenen Boards
+- **Nach dem Event:** Board bleibt dauerhaft online als Archiv und Suchkanal für 2027
+
 ---
 
 ## Kampagnenphasen
@@ -99,7 +151,8 @@ Für jeden Teilnehmenden vorbereiten:
 - [ ] Pressemitteilung 1 an Rheinpfalz, Pfalz-Express, Wochenblatt-Reporter: Ankündigung 14. Kunsttage + neue Website + Online-Katalog als Neuheit
 - [ ] 301-Redirect von lions-kunsttage.de auf kunsttage-ludwigshoehe.de aktivieren
 - [ ] Instagram- und Facebook-Seite „Kunsttage auf der Ludwigshöhe" einrichten und erste Beiträge veröffentlichen (Villa-Foto, Ankündigung, Countdown)
-- [ ] Briefing-Paket an alle teilnehmenden Künstlerinnen und Künstler versenden (Vorlagen, Hashtag, Timing)
+- [ ] Pinterest Business-Account „Kunsttage auf der Ludwigshöhe" einrichten, Board 2026 anlegen
+- [ ] Briefing-Paket an alle teilnehmenden Künstlerinnen und Künstler versenden (Vorlagen, Hashtag, Timing, Pinterest-Anleitung)
 - [ ] Künstler-Ankündigungsposts: koordiniert in einer Woche, alle mit Hashtag
 - [ ] Eintrag bei Kultursommer Rheinland-Pfalz und Tourismus Südliche Weinstraße
 - [ ] Eintrag im Veranstaltungskalender von pfalz.de, edenkoben.de, suedlicheweinstrasse.de
@@ -117,6 +170,7 @@ Für jeden Teilnehmenden vorbereiten:
 **Maßnahmen:**
 - [ ] Pressemitteilung 2: „Erstmals: Kunstwerke online vorab entdecken und vormerken" — Neuheitswert des Katalogs als Aufhänger
 - [ ] Künstler teilen ihre individuellen Katalog-Links (Vorlage B)
+- [ ] Alle Werke auf Pinterest pinnen (Board 2026), Künstler bitten ihre Boards zu befüllen (Vorlage D)
 - [ ] Instagram-Posts: Einzelwerke mit Preis und direktem Link zur Bildseite
 - [ ] Facebook-Event erstellen: „14. Kunsttage auf der Ludwigshöhe" mit Teilnehmerfunktion
 - [ ] Google-Eintrag (Business Profile) für das Event anlegen
@@ -163,6 +217,7 @@ Für jeden Teilnehmenden vorbereiten:
 | **Presse (lokal)** | Breite Regionalbevölkerung | Glaubwürdigkeit, Reichweite | 3 Pressemitteilungen |
 | **Tourismusportale** | Tagesausflügler von außerhalb | Sichtbarkeit als Ausflugsziel | Einmalige Einträge |
 | **Google Business** | Aktive Suche nach Event | Erscheinen bei lokaler Suche | Einmalige Einrichtung |
+| **Pinterest** | Kunstsuchende, Einrichtungsinteressierte | Langfristige Sichtbarkeit, Google-Indexierung | Gering (einmalig Setup + Pins) |
 | **Lions-Netzwerk** | Clubmitglieder, Distrikt | Persönliche Einladung, Mundpropaganda | Gering |
 | **E-Mail** | Bestehende Kontakte der 5 Clubs | Direkte Einladung | 1–2 Mailings |
 
@@ -216,6 +271,7 @@ August       September        Oktober          November
 | Verzeichnis-Einträge | 3–4 Std. einmalig | 0 € |
 | Google Business Profil | 1 Std. einmalig | 0 € |
 | Facebook-Event | 1 Std. einmalig | 0 € |
+| Pinterest Business-Account + Board + Pins | 2–3 Std. einmalig | 0 € |
 | Flyer für Weingüter (optional) | Druckkosten | ~100–200 € |
 | Bezahlte Facebook/Instagram-Posts (optional) | 2 Std. Setup | 200–500 € |
 
