@@ -248,7 +248,7 @@ export default function AdminPlaetzePage() {
         if (raumPlaetze.length === 0) return null;
         const belegtInRaum = raumPlaetze.filter(p => p.kuenstler_id).length;
         return (
-          <div key={raum} className="bg-white rounded-lg shadow-sm border overflow-hidden">
+          <div key={raum} className="bg-white rounded-lg shadow-sm border">
             <div className="bg-lions-blue/5 border-b border-lions-blue/10 px-4 py-2 flex justify-between items-center">
               <h2 className="font-semibold text-gray-800 text-sm">{raumLabel(raum, raumplan)}</h2>
               <span className="text-xs text-gray-400">
