@@ -217,3 +217,12 @@ export async function fotoHochladen(bildId: number, file: File): Promise<{ bild_
   if (!res.ok) throw new Error(await res.text());
   return res.json();
 }
+
+// --- Platzplan ---
+export const getAllePlaetze = () => req<import("./types").Platz[]>("/admin/plaetze");
+
+export const platzZuweisen = (platzId: number, kuenstlerId: number | null) =>
+  req<import("./types").Platz>(`/admin/plaetze/${platzId}`, {
+    method: "PATCH",
+    body: JSON.stringify({ kuenstler_id: kuenstlerId }),
+  });

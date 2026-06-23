@@ -142,3 +142,13 @@ export interface KaufCreate {
   kaeufer_email: string;
   zahlungsart: "Bar" | "PayPal" | "Kreditkarte" | "Überweisung";
 }
+
+export interface Platz {
+  id: number;
+  position_nr: number;
+  raum: string;
+  platz_kategorie: 1 | 2 | 3 | 4;
+  haenge_meter: string;
+  kuenstler_id: number | null;
+  kuenstler?: Kuenstler;
+}

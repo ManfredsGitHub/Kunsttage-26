@@ -273,3 +273,24 @@ class KuenstlerNachrichtGelesen(SQLModel, table=True):
 class Einstellung(SQLModel, table=True):
     schluessel: str = Field(primary_key=True)
     wert: str = Field(default="")
+
+
+# --- Platzplan ---
+
+class Platz(SQLModel, table=True):
+    id: Optional[int] = Field(default=None, primary_key=True)
+    position_nr: int = Field(index=True, unique=True)
+    raum: str
+    platz_kategorie: int
+    haenge_meter: str
+    kuenstler_id: Optional[int] = Field(default=None, foreign_key="kuenstler.id")
+
+
+class PlatzPublic(SQLModel):
+    id: int
+    position_nr: int
+    raum: str
+    platz_kategorie: int
+    haenge_meter: str
+    kuenstler_id: Optional[int] = None
+    kuenstler: Optional[KuenstlerPublic] = None

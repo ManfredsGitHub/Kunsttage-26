@@ -5,7 +5,7 @@ from pydantic import BaseModel
 from typing import Optional
 import secrets
 from datetime import datetime, timedelta
-from models import Bild, BildPublic, BildFoto, Kuenstler, KuenstlerCreate, KuenstlerPublic, Reservierung, Kauf, Besucher, MerklisteEintrag, Genre, Verfuegbarkeit, Abrechnungsempfaenger, KuenstlerNachricht, KuenstlerNachrichtGelesen
+from models import Bild, BildPublic, BildFoto, Kuenstler, KuenstlerCreate, KuenstlerPublic, Reservierung, Kauf, Besucher, MerklisteEintrag, Genre, Verfuegbarkeit, Abrechnungsempfaenger, KuenstlerNachricht, KuenstlerNachrichtGelesen, Platz, PlatzPublic
 from database import get_session
 from services.import_service import import_csv, import_excel
 from services.auth_service import check_passwort, set_passwort
@@ -673,3 +673,48 @@ def passwort_aendern(data: PasswortAendernData):
         raise HTTPException(status_code=400, detail="Passwort zu kurz (mind. 8 Zeichen)")
     set_passwort(data.rolle, data.neues_passwort)
     return {"ok": True}
+
+
+# --- Platzplan ---
+
+@router.get("/plaetze", response_model=list[PlatzPublic])
+def alle_plaetze(session: Session = Depends(get_session)):
+    plaetze = session.exec(select(Platz).order_by(Platz.position_nr)).all()
+    result = []
+    for p in plaetze:
+        item = PlatzPublic.model_validate(p)
+        if p.kuenstler_id:
+            k = session.get(Kuenstler, p.kuenstler_id)
+            if k:
+                item.kuenstler = KuenstlerPublic.model_validate(k)
+        result.append(item)
+    return result
+
+
+class PlatzZuweisungIn(BaseModel):
+    kuenstler_id: Optional[int] = None
+
+
+@router.patch("/plaetze/{platz_id}", response_model=PlatzPublic)
+def platz_zuweisen(
+    platz_id: int,
+    body: PlatzZuweisungIn,
+    session: Session = Depends(get_session),
+):
+    platz = session.get(Platz, platz_id)
+    if not platz:
+        raise HTTPException(status_code=404, detail="Platz nicht gefunden")
+    if body.kuenstler_id is not None:
+        k = session.get(Kuenstler, body.kuenstler_id)
+        if not k:
+            raise HTTPException(status_code=404, detail="Künstler nicht gefunden")
+    platz.kuenstler_id = body.kuenstler_id
+    session.add(platz)
+    session.commit()
+    session.refresh(platz)
+    item = PlatzPublic.model_validate(platz)
+    if platz.kuenstler_id:
+        k = session.get(Kuenstler, platz.kuenstler_id)
+        if k:
+            item.kuenstler = KuenstlerPublic.model_validate(k)
+    return item
