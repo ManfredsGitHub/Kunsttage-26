@@ -39,14 +39,14 @@ function EditDropdown({ raum, onSave, onClose }: EditDropdownProps) {
   const [wert, setWert] = useState(raum.belegt_durch ?? "");
   const ref = useRef<HTMLDivElement>(null);
   const [openUp, setOpenUp] = useState(false);
+  const [alignRight, setAlignRight] = useState(false);
 
   useEffect(() => {
-    // Nach Mount prüfen ob Dropdown unten aus dem Viewport läuft
     if (ref.current) {
       const rect = ref.current.getBoundingClientRect();
-      if (rect.bottom > window.innerHeight - 16) {
-        setOpenUp(true);
-      }
+      if (rect.bottom > window.innerHeight - 16) setOpenUp(true);
+      if (rect.left < 8) setAlignRight(false);         // links ok, linksbündig lassen
+      if (rect.right > window.innerWidth - 8) setAlignRight(true); // rechts zu weit → rechtsbündig
     }
     function handler(e: MouseEvent) {
       if (ref.current && !ref.current.contains(e.target as Node)) onClose();
@@ -68,7 +68,7 @@ function EditDropdown({ raum, onSave, onClose }: EditDropdownProps) {
   return (
     <div
       ref={ref}
-      className={`absolute z-50 ${openUp ? "bottom-full mb-1" : "top-full mt-1"} left-1/2 -translate-x-1/2 w-64 bg-white border border-gray-200 rounded-lg shadow-xl`}
+      className={`absolute z-50 ${openUp ? "bottom-full mb-1" : "top-full mt-1"} ${alignRight ? "right-0" : "left-0"} w-64 bg-white border border-gray-200 rounded-lg shadow-xl`}
       onClick={e => e.stopPropagation()}
     >
       <div className="p-2 border-b border-gray-100 text-xs font-semibold text-gray-500 uppercase tracking-wide">
