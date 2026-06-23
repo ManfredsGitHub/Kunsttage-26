@@ -31,23 +31,22 @@ const FREI_FARBE    = "bg-white border-dashed border-gray-300 text-gray-300";
 
 type EditDropdownProps = {
   raum: Raumzuteilung;
+  triggerRef: React.RefObject<HTMLButtonElement | null>;
   onSave: (wert: string | null) => void;
   onClose: () => void;
 };
 
-function EditDropdown({ raum, onSave, onClose }: EditDropdownProps) {
+function EditDropdown({ raum, triggerRef, onSave, onClose }: EditDropdownProps) {
   const [wert, setWert] = useState(raum.belegt_durch ?? "");
   const ref = useRef<HTMLDivElement>(null);
-  const [openUp, setOpenUp] = useState(false);
-  const [alignRight, setAlignRight] = useState(false);
+
+  // Richtung anhand des Trigger-Buttons vorab berechnen
+  const triggerRect = triggerRef.current?.getBoundingClientRect();
+  const spaceBelow = triggerRect ? window.innerHeight - triggerRect.bottom : 999;
+  const openUp = spaceBelow < 300;
+  const alignRight = triggerRect ? triggerRect.left + 256 > window.innerWidth - 8 : false;
 
   useEffect(() => {
-    if (ref.current) {
-      const rect = ref.current.getBoundingClientRect();
-      if (rect.bottom > window.innerHeight - 16) setOpenUp(true);
-      if (rect.left < 8) setAlignRight(false);         // links ok, linksbündig lassen
-      if (rect.right > window.innerWidth - 8) setAlignRight(true); // rechts zu weit → rechtsbündig
-    }
     function handler(e: MouseEvent) {
       if (ref.current && !ref.current.contains(e.target as Node)) onClose();
     }
@@ -152,9 +151,12 @@ function RaumKarte({ zelle, zuteilung, isSaving, isSelected, onSelect, onSave }:
     ? (CLUB_FARBEN[belegung] ?? DEFAULT_FARBE)
     : FREI_FARBE;
 
+  const buttonRef = useRef<HTMLButtonElement>(null);
+
   return (
     <div className="relative">
       <button
+        ref={buttonRef}
         onClick={onSelect}
         disabled={isSaving}
         className={`w-full min-h-[90px] border-2 rounded-lg p-2 flex flex-col gap-1 transition-all cursor-pointer text-left ${farbe} ${
@@ -171,6 +173,7 @@ function RaumKarte({ zelle, zuteilung, isSaving, isSelected, onSelect, onSave }:
       {isSelected && zuteilung && (
         <EditDropdown
           raum={zuteilung}
+          triggerRef={buttonRef}
           onSave={(v) => { onSave(v); }}
           onClose={onSelect}
         />
@@ -255,7 +258,7 @@ export default function AdminRaumplanPage() {
       </div>
 
       {/* Grundriss */}
-      <div className="bg-white rounded-xl shadow border overflow-hidden p-4">
+      <div className="bg-white rounded-xl shadow border p-4">
         {/* Oberreihe: Räume 43–49 */}
         <div className="mb-1">
           <p className="text-xs text-gray-400 uppercase tracking-wide mb-2 font-medium">Ausstellungsräume</p>
