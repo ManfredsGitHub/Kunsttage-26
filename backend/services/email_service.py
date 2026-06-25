@@ -67,6 +67,88 @@ def send_kaufbestaetigung(email: str, name: str, bildtitel: str, preis: float, z
     )
 
 
+def send_kaufanfrage_besucher(email: str, name: str, bildtitel: str):
+    _send(
+        email,
+        f"Ihre Kaufanfrage – {bildtitel}",
+        f"""
+        <p>Hallo {name},</p>
+        <p>vielen Dank für Ihre Kaufanfrage für <strong>„{bildtitel}"</strong>.</p>
+        <p>Wir melden uns zeitnah bei Ihnen, um Versand, Verpackung und Kosten individuell abzustimmen.</p>
+        <p>Mit freundlichen Grüßen<br>Kunsttage auf der Ludwigshöhe<br>Lions Clubs aus der Pfalz</p>
+        """,
+    )
+
+
+def send_kaufanfrage_admin(
+    anfrage_id: int,
+    bild_nr: str,
+    bildtitel: str,
+    kuenstler: str,
+    verkaufspreis,
+    anrede,
+    vorname: str,
+    name: str,
+    email: str,
+    telefon,
+    strasse: str,
+    plz: str,
+    ort: str,
+    land: str,
+    anmerkung,
+):
+    if not ADMIN_EMAIL:
+        return
+    preis_str = f"{verkaufspreis:.2f} €" if verkaufspreis else "—"
+    anrede_str = anrede or ""
+    telefon_str = telefon or "—"
+    anmerkung_str = anmerkung or "—"
+    _send(
+        ADMIN_EMAIL,
+        f"Neue Kaufanfrage #{anfrage_id} – {bildtitel}",
+        f"""
+        <div style="font-family:sans-serif;max-width:600px;margin:0 auto">
+          <div style="background:#1e3a5f;color:#fff;padding:20px 24px;border-radius:8px 8px 0 0">
+            <h2 style="margin:0;font-size:18px">Neue Kaufanfrage #{anfrage_id}</h2>
+            <p style="margin:4px 0 0;opacity:.8;font-size:14px">Kunsttage auf der Ludwigshöhe 2026</p>
+          </div>
+          <div style="background:#f9fafb;padding:24px;border-radius:0 0 8px 8px;border:1px solid #e5e7eb">
+
+            <h3 style="color:#1e3a5f;margin:0 0 12px;font-size:15px">WERK</h3>
+            <table style="width:100%;border-collapse:collapse;margin-bottom:24px;font-size:14px">
+              <tr><td style="padding:4px 0;color:#6b7280;width:140px">Bild-Nr.</td><td><strong>{bild_nr}</strong></td></tr>
+              <tr><td style="padding:4px 0;color:#6b7280">Titel</td><td><strong>„{bildtitel}"</strong></td></tr>
+              <tr><td style="padding:4px 0;color:#6b7280">Künstler</td><td>{kuenstler}</td></tr>
+              <tr><td style="padding:4px 0;color:#6b7280">Verkaufspreis</td><td><strong>{preis_str}</strong></td></tr>
+            </table>
+
+            <h3 style="color:#1e3a5f;margin:0 0 12px;font-size:15px">KÄUFER — für xt:Commerce</h3>
+            <table style="width:100%;border-collapse:collapse;margin-bottom:24px;font-size:14px">
+              <tr><td style="padding:4px 0;color:#6b7280;width:140px">Anrede</td><td>{anrede_str}</td></tr>
+              <tr><td style="padding:4px 0;color:#6b7280">Vorname</td><td>{vorname}</td></tr>
+              <tr><td style="padding:4px 0;color:#6b7280">Nachname</td><td>{name}</td></tr>
+              <tr><td style="padding:4px 0;color:#6b7280">E-Mail</td><td><a href="mailto:{email}">{email}</a></td></tr>
+              <tr><td style="padding:4px 0;color:#6b7280">Telefon</td><td>{telefon_str}</td></tr>
+              <tr><td style="padding:4px 0;color:#6b7280">Straße</td><td>{strasse}</td></tr>
+              <tr><td style="padding:4px 0;color:#6b7280">PLZ / Ort</td><td>{plz} {ort}</td></tr>
+              <tr><td style="padding:4px 0;color:#6b7280">Land</td><td>{land}</td></tr>
+            </table>
+
+            <h3 style="color:#1e3a5f;margin:0 0 12px;font-size:15px">ANMERKUNG DES KÄUFERS</h3>
+            <p style="font-size:14px;background:#fff;border:1px solid #e5e7eb;padding:12px;border-radius:6px;margin:0 0 24px">{anmerkung_str}</p>
+
+            <div style="background:#fef3c7;border:1px solid #fcd34d;border-radius:6px;padding:14px;font-size:13px">
+              <strong>Nächste Schritte:</strong><br>
+              1. Käufer kontaktieren und Versandkosten abstimmen<br>
+              2. Bestellung in <a href="https://shop22.lions-kunsttage.de">shop22.lions-kunsttage.de</a> anlegen<br>
+              3. Status in der <a href="{BASE_URL}/admin/kaufanfragen">Kaufanfragen-Übersicht</a> auf „Kontaktiert" setzen
+            </div>
+          </div>
+        </div>
+        """,
+    )
+
+
 def _abmelde_footer(token: str) -> str:
     link = f"{BASE_URL}/merkliste/abmelden?token={token}"
     return f"""
@@ -152,14 +234,100 @@ def send_nachfass(betreff: str, text: str, empfaenger: list[tuple[str, str | Non
 
 def send_kuenstler_login(email: str, name: str, token: str):
     link = f"{BASE_URL}/kuenstler/login?token={token}"
+    zeilen = "".join(
+        f"""<tr>
+          <td style="border:1px solid #d1d5db;padding:8px 6px;">&nbsp;</td>
+          <td style="border:1px solid #d1d5db;padding:8px 6px;">&nbsp;</td>
+          <td style="border:1px solid #d1d5db;padding:8px 6px;">&nbsp;</td>
+          <td style="border:1px solid #d1d5db;padding:8px 6px;white-space:nowrap;">&nbsp;&nbsp;&nbsp;&nbsp; × &nbsp;&nbsp;&nbsp;&nbsp;</td>
+          <td style="border:1px solid #d1d5db;padding:8px 6px;">&nbsp;</td>
+          <td style="border:1px solid #d1d5db;padding:8px 6px;">&nbsp;</td>
+        </tr>"""
+        for _ in range(8)
+    )
     _send(
         email,
-        "Ihr Zugang zum Künstler-Portal",
+        "Ihr Zugang zum Künstler-Portal – Kunsttage auf der Ludwigshöhe 2026",
         f"""
-        <p>Hallo {name},</p>
-        <p>hier ist Ihr persönlicher Login-Link für das Künstler-Portal:</p>
-        <p><a href="{link}">{link}</a></p>
-        <p>Der Link ist 48 Stunden gültig.</p>
-        <p>Mit freundlichen Grüßen<br>Kunsttage auf der Ludwigshöhe</p>
+        <div style="font-family:Arial,sans-serif;max-width:640px;margin:0 auto;color:#1f2937">
+
+          <div style="background:#003087;padding:20px 24px;border-radius:6px 6px 0 0">
+            <p style="color:#C8A951;margin:0;font-size:13px;letter-spacing:1px">LIONS CLUB VILLA LUDWIGSHÖHE</p>
+            <h1 style="color:#ffffff;margin:6px 0 0;font-size:20px">Kunsttage auf der Ludwigshöhe 2026</h1>
+          </div>
+
+          <div style="background:#f9fafb;padding:20px 24px;border:1px solid #e5e7eb;border-top:none">
+            <p>Hallo {name},</p>
+            <p>Sie sind eingeladen, Ihre Werke für die <strong>14. Kunsttage auf der Ludwigshöhe</strong>
+            am <strong>17. & 18. Oktober 2026</strong> einzureichen.</p>
+
+            <p>Bitte bereiten Sie die Daten Ihrer Werke vor — die Liste unten hilft dabei.
+            Sobald Sie alles zusammengetragen haben, klicken Sie den Link und erfassen die Daten direkt im Portal.</p>
+
+            <div style="background:#003087;border-radius:6px;padding:16px 20px;margin:20px 0;text-align:center">
+              <p style="color:#C8A951;margin:0 0 8px;font-size:12px;letter-spacing:1px">IHR PERSÖNLICHER ZUGANG</p>
+              <a href="{link}"
+                 style="color:#ffffff;font-size:15px;word-break:break-all">{link}</a>
+              <p style="color:#93c5fd;margin:10px 0 0;font-size:12px">⏱ Der Link ist 48 Stunden gültig</p>
+            </div>
+          </div>
+
+          <!-- Vorbereitungstabelle -->
+          <div style="padding:20px 24px;border:1px solid #e5e7eb;border-top:none">
+            <h2 style="color:#003087;font-size:16px;margin:0 0 4px">Vorbereitungs-Checkliste</h2>
+            <p style="color:#6b7280;font-size:13px;margin:0 0 16px">
+              Bitte füllen Sie diese Tabelle aus, bevor Sie sich einloggen.
+              Pflichtfelder sind mit <strong>*</strong> markiert.
+            </p>
+
+            <table style="width:100%;border-collapse:collapse;font-size:13px">
+              <thead>
+                <tr style="background:#003087;color:#ffffff">
+                  <th style="border:1px solid #1e40af;padding:8px 6px;text-align:left;min-width:120px">Bildtitel *</th>
+                  <th style="border:1px solid #1e40af;padding:8px 6px;text-align:left;min-width:120px">Technik *</th>
+                  <th style="border:1px solid #1e40af;padding:8px 6px;text-align:left;min-width:90px">Genre *</th>
+                  <th style="border:1px solid #1e40af;padding:8px 6px;text-align:left;white-space:nowrap">Maße mit Rahmen<br><span style="font-weight:normal;font-size:11px">Höhe × Breite (cm) *</span></th>
+                  <th style="border:1px solid #1e40af;padding:8px 6px;text-align:left;min-width:80px">Einlieferungs-<br>preis (€) *</th>
+                  <th style="border:1px solid #1e40af;padding:8px 6px;text-align:left;min-width:100px">Anmerkung</th>
+                </tr>
+              </thead>
+              <tbody>
+                {zeilen}
+              </tbody>
+            </table>
+
+            <!-- Genre-Referenz -->
+            <div style="margin-top:16px;padding:12px 14px;background:#f3f4f6;border-radius:6px;font-size:12px">
+              <strong style="color:#003087">Genre-Auswahl:</strong>
+              <span style="color:#374151">
+                Abstrakt · Akt · Landschaft · Menschen · Pfalz · Portrait · Städte · Stilleben · Sonstiges
+              </span>
+            </div>
+
+            <!-- Hinweis Fotos -->
+            <div style="margin-top:12px;padding:12px 14px;background:#fffbeb;border:1px solid #fcd34d;border-radius:6px;font-size:12px;color:#92400e">
+              <strong>Fotos der Werke:</strong>
+              Halten Sie auch gute Fotos Ihrer Werke bereit — diese laden Sie direkt im Portal hoch.
+              Bitte möglichst hell und ohne Schatten fotografieren.
+            </div>
+
+            <!-- Preishinweis -->
+            <div style="margin-top:12px;padding:12px 14px;background:#f0fdf4;border:1px solid #86efac;border-radius:6px;font-size:12px;color:#14532d">
+              <strong>Zum Einlieferungspreis:</strong>
+              Geben Sie den Betrag an, den Sie für Ihr Werk erhalten möchten.
+              Der Ausstellungspreis wird automatisch berechnet.
+            </div>
+          </div>
+
+          <div style="padding:16px 24px;border:1px solid #e5e7eb;border-top:none;border-radius:0 0 6px 6px;background:#f9fafb">
+            <p style="margin:0;font-size:13px">Bei Fragen wenden Sie sich gerne an uns.</p>
+            <p style="margin:8px 0 0;font-size:13px">Mit freundlichen Grüßen<br>
+            <strong>Orgateam Kunsttage auf der Ludwigshöhe</strong></p>
+            <p style="margin:16px 0 0;font-size:11px;color:#9ca3af">
+              17. & 18. Oktober 2026 · Schloss Villa Ludwigshöhe · Edenkoben · Eintritt frei
+            </p>
+          </div>
+
+        </div>
         """,
     )

@@ -8,7 +8,7 @@ import os
 load_dotenv()
 
 from database import create_db
-from routers import artworks, reservations, sales, artists, admin, merkliste, archive, export, auth as auth_router, einstellungen
+from routers import artworks, reservations, sales, artists, admin, merkliste, archive, export, auth as auth_router, einstellungen, kaufanfragen
 from services.auth_service import verify_token
 
 app = FastAPI(title="Kunsttage auf der Ludwigshöhe API", version="1.0.0")
@@ -23,6 +23,7 @@ app.include_router(archive.router)
 app.include_router(export.router)
 app.include_router(auth_router.router)
 app.include_router(einstellungen.router)
+app.include_router(kaufanfragen.router)
 
 # ── Auth-Middleware ───────────────────────────────────────────────────────────
 # Pfade, die ohne JWT erreichbar sind
@@ -51,6 +52,10 @@ def _orga_erlaubt(method: str, path: str) -> bool:
 async def auth_middleware(request: Request, call_next):
     path = request.url.path
     method = request.method
+
+    # POST /kaufanfragen/ ist öffentlich (Besucher reichen Kaufanfrage ein)
+    if method == "POST" and path == "/kaufanfragen/":
+        return await call_next(request)
 
     if method == "OPTIONS" or _is_open(path):
         return await call_next(request)

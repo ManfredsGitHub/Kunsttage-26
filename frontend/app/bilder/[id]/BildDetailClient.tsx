@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { getBild, reservieren, getBildFotosPublic } from "@/lib/api";
+import { getBild, reservieren, getBildFotosPublic, kaufanfrageStellen } from "@/lib/api";
 import { Bild, BildFoto } from "@/lib/types";
 import { formatBildNr, bildAlt } from "@/lib/utils";
 import MerklistenButton from "@/components/MerklistenButton";
@@ -103,6 +103,14 @@ export default function BildDetailClient({ id, initialBild }: { id: string; init
   const [erfolg, setErfolg] = useState(false);
   const [senden, setSenden] = useState(false);
   const [dsgvo, setDsgvo] = useState(false);
+  const [kaufForm, setKaufForm] = useState({
+    anrede: "", vorname: "", name: "", email: "", telefon: "",
+    strasse: "", plz: "", ort: "", land: "Deutschland", anmerkung: "",
+  });
+  const [kaufErfolg, setKaufErfolg] = useState(false);
+  const [kaufSenden, setKaufSenden] = useState(false);
+  const [kaufFehler, setKaufFehler] = useState("");
+  const [kaufDsgvo, setKaufDsgvo] = useState(false);
   const [lightbox, setLightbox] = useState(false);
   const [aktivFoto, setAktivFoto] = useState<string | null>(initialBild?.bild_url_web ?? null);
   const [zusatzFotos, setZusatzFotos] = useState<BildFoto[]>([]);
@@ -118,6 +126,34 @@ export default function BildDetailClient({ id, initialBild }: { id: string; init
     getBild(Number(id)).then(b => { setBild(b); setAktivFoto(b.bild_url_web ?? null); }).catch(() => setFehler("Bild nicht gefunden."));
     getBildFotosPublic(Number(id)).then(setZusatzFotos).catch(() => {});
   }, [id]);
+
+  async function handleKaufanfrage(e: React.FormEvent) {
+    e.preventDefault();
+    if (!bild || !kaufDsgvo) return;
+    setKaufSenden(true);
+    setKaufFehler("");
+    try {
+      await kaufanfrageStellen({
+        bild_id: bild.id,
+        anrede: kaufForm.anrede || undefined,
+        vorname: kaufForm.vorname,
+        name: kaufForm.name,
+        email: kaufForm.email,
+        telefon: kaufForm.telefon || undefined,
+        strasse: kaufForm.strasse,
+        plz: kaufForm.plz,
+        ort: kaufForm.ort,
+        land: kaufForm.land || "Deutschland",
+        anmerkung: kaufForm.anmerkung || undefined,
+      });
+      setKaufErfolg(true);
+      setBild({ ...bild, verfuegbarkeit: "Reserviert" });
+    } catch (err: any) {
+      setKaufFehler(err.message);
+    } finally {
+      setKaufSenden(false);
+    }
+  }
 
   async function handleReservieren(e: React.FormEvent) {
     e.preventDefault();
@@ -293,7 +329,78 @@ export default function BildDetailClient({ id, initialBild }: { id: string; init
             )}
           </div>
 
-          {bild.verfuegbarkeit === "Verfügbar" && !erfolg && (
+          {bild.in_ausstellung === false && bild.verfuegbarkeit === "Verfügbar" && !kaufErfolg && (
+            <form onSubmit={handleKaufanfrage} className="space-y-4 border-t pt-6">
+              <div>
+                <h2 className="font-semibold text-gray-800">Kaufanfrage stellen</h2>
+                <p className="text-sm text-gray-500 mt-1">Nur im Online-Katalog — wir klären Versand und Kosten individuell mit Ihnen.</p>
+              </div>
+              <div className="grid grid-cols-3 gap-3">
+                <select value={kaufForm.anrede} onChange={(e) => setKaufForm({ ...kaufForm, anrede: e.target.value })}
+                  className="border rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-lions-blue">
+                  <option value="">Anrede</option>
+                  <option value="Herr">Herr</option>
+                  <option value="Frau">Frau</option>
+                  <option value="Divers">Divers</option>
+                </select>
+                <input required placeholder="Vorname" value={kaufForm.vorname}
+                  onChange={(e) => setKaufForm({ ...kaufForm, vorname: e.target.value })}
+                  className="border rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-lions-blue" />
+                <input required placeholder="Nachname" value={kaufForm.name}
+                  onChange={(e) => setKaufForm({ ...kaufForm, name: e.target.value })}
+                  className="border rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-lions-blue" />
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <input required type="email" placeholder="E-Mail" value={kaufForm.email}
+                  onChange={(e) => setKaufForm({ ...kaufForm, email: e.target.value })}
+                  className="border rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-lions-blue" />
+                <input placeholder="Telefon (optional)" value={kaufForm.telefon}
+                  onChange={(e) => setKaufForm({ ...kaufForm, telefon: e.target.value })}
+                  className="border rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-lions-blue" />
+              </div>
+              <input required placeholder="Straße und Hausnummer" value={kaufForm.strasse}
+                onChange={(e) => setKaufForm({ ...kaufForm, strasse: e.target.value })}
+                className="border rounded-md px-3 py-2 text-sm w-full focus:outline-none focus:ring-2 focus:ring-lions-blue" />
+              <div className="grid grid-cols-3 gap-3">
+                <input required placeholder="PLZ" value={kaufForm.plz}
+                  onChange={(e) => setKaufForm({ ...kaufForm, plz: e.target.value })}
+                  className="border rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-lions-blue" />
+                <input required placeholder="Ort" value={kaufForm.ort}
+                  onChange={(e) => setKaufForm({ ...kaufForm, ort: e.target.value })}
+                  className="col-span-2 border rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-lions-blue" />
+              </div>
+              <input placeholder="Land" value={kaufForm.land}
+                onChange={(e) => setKaufForm({ ...kaufForm, land: e.target.value })}
+                className="border rounded-md px-3 py-2 text-sm w-full focus:outline-none focus:ring-2 focus:ring-lions-blue" />
+              <textarea placeholder="Anmerkungen (optional)" value={kaufForm.anmerkung}
+                onChange={(e) => setKaufForm({ ...kaufForm, anmerkung: e.target.value })}
+                rows={2}
+                className="border rounded-md px-3 py-2 text-sm w-full focus:outline-none focus:ring-2 focus:ring-lions-blue resize-none" />
+              <label className="flex items-start gap-2 text-sm text-gray-600">
+                <input type="checkbox" checked={kaufDsgvo} onChange={(e) => setKaufDsgvo(e.target.checked)} className="mt-0.5" required />
+                Ich stimme der Verarbeitung meiner Kontaktdaten zur Bearbeitung dieser Kaufanfrage zu (DSGVO).
+              </label>
+              {kaufFehler && <p className="text-red-600 text-sm">{kaufFehler}</p>}
+              <button type="submit" disabled={kaufSenden || !kaufDsgvo}
+                className="w-full bg-lions-blue text-white py-2 rounded-md font-medium hover:bg-blue-900 transition-colors disabled:opacity-50">
+                {kaufSenden ? "Wird gesendet…" : "Kaufanfrage absenden"}
+              </button>
+            </form>
+          )}
+
+          {bild.in_ausstellung === false && bild.verfuegbarkeit !== "Verfügbar" && !kaufErfolg && (
+            <div className="border-t pt-6 p-4 bg-blue-50 rounded-lg text-sm text-blue-800">
+              <strong>Nur im Online-Katalog</strong> — dieses Werk ist bereits {bild.verfuegbarkeit === "Reserviert" ? "reserviert" : "verkauft"} und nicht mehr verfügbar.
+            </div>
+          )}
+
+          {kaufErfolg && (
+            <div className="bg-green-50 border border-green-200 rounded-md p-4 text-green-800 border-t mt-6">
+              <strong>Kaufanfrage eingegangen.</strong> Wir melden uns zeitnah bei Ihnen, um Versand und Kosten abzustimmen.
+            </div>
+          )}
+
+          {bild.verfuegbarkeit === "Verfügbar" && bild.in_ausstellung !== false && !erfolg && (
             <form onSubmit={handleReservieren} className="space-y-4 border-t pt-6">
               <h2 className="font-semibold text-gray-800">Werk reservieren</h2>
               <div className="grid grid-cols-2 gap-3">

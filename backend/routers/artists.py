@@ -178,7 +178,7 @@ def bild_einreichen(kuenstler_id: int, data: BildEinreichungData, session: Sessi
         abrechnungsempf=data.abrechnungsempf,
         galerist_id=data.galerist_id,
         freigegeben=False,
-        in_ausstellung=True,
+        in_ausstellung=data.in_ausstellung,
     )
     session.add(b)
     session.commit()

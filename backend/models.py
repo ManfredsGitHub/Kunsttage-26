@@ -42,6 +42,13 @@ class Zahlungsart(str, Enum):
     ueberweisung = "Überweisung"
 
 
+class KaufanfrageStatus(str, Enum):
+    offen = "Offen"
+    kontaktiert = "Kontaktiert"
+    abgeschlossen = "Abgeschlossen"
+    storniert = "Storniert"
+
+
 # --- Künstler ---
 
 class KuenstlerBase(SQLModel):
@@ -144,6 +151,7 @@ class BildCreate(BildBase):
     bild_nr: Optional[str] = None  # wird auto-generiert wenn leer
     einlieferungspreis: Optional[float] = None
     verkaufspreis: Optional[float] = None
+    in_ausstellung: bool = True
 
 
 class BildPublic(BildBase):
@@ -228,6 +236,39 @@ class KaufCreate(SQLModel):
     kaeufer_ort: str
     kaeufer_email: str
     zahlungsart: Zahlungsart
+
+
+# --- Kaufanfrage (Online-Kaufabsicht, Abwicklung über externes System) ---
+
+class Kaufanfrage(SQLModel, table=True):
+    id: Optional[int] = Field(default=None, primary_key=True)
+    bild_id: int = Field(foreign_key="bild.id")
+    anrede: Optional[str] = None
+    vorname: str
+    name: str
+    email: str
+    telefon: Optional[str] = None
+    strasse: str
+    plz: str
+    ort: str
+    land: str = "Deutschland"
+    anmerkung: Optional[str] = None
+    status: KaufanfrageStatus = KaufanfrageStatus.offen
+    erstellt_am: datetime = Field(default_factory=datetime.utcnow)
+
+
+class KaufanfrageCreate(SQLModel):
+    bild_id: int
+    anrede: Optional[str] = None
+    vorname: str
+    name: str
+    email: str
+    telefon: Optional[str] = None
+    strasse: str
+    plz: str
+    ort: str
+    land: str = "Deutschland"
+    anmerkung: Optional[str] = None
 
 
 # --- Merkliste ---

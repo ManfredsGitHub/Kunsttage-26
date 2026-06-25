@@ -57,6 +57,7 @@ export const kuenstlerBildEinreichen = (id: number, data: {
   breite_rahmen_cm: number; hoehe_rahmen_cm: number;
   einlieferungspreis?: number; anmerkung_bild?: string;
   abrechnungsempf?: string; galerist_id?: number;
+  in_ausstellung?: boolean;
 }) => req<Bild>(`/kuenstler/${id}/bilder`, { method: "POST", body: JSON.stringify(data) });
 
 export const kuenstlerBildLoeschen = (kuenstlerId: number, bildId: number) =>
@@ -217,6 +218,21 @@ export async function fotoHochladen(bildId: number, file: File): Promise<{ bild_
   if (!res.ok) throw new Error(await res.text());
   return res.json();
 }
+
+// --- Kaufanfragen ---
+export const kaufanfrageStellen = (data: {
+  bild_id: number; anrede?: string; vorname: string; name: string;
+  email: string; telefon?: string; strasse: string; plz: string;
+  ort: string; land?: string; anmerkung?: string;
+}) => req<{ id: number; status: string }>("/kaufanfragen/", {
+  method: "POST", body: JSON.stringify(data),
+});
+
+export const getAlleKaufanfragen = () =>
+  req<import("./types").Kaufanfrage[]>("/kaufanfragen/");
+
+export const kaufanfrageStatusSetzen = (id: number, status: import("./types").KaufanfrageStatus) =>
+  req<{ status: string }>(`/kaufanfragen/${id}/status?status=${encodeURIComponent(status)}`, { method: "PATCH" });
 
 // --- Raumplan ---
 export const getRaumplan = () => req<import("./types").Raumzuteilung[]>("/admin/raumplan");

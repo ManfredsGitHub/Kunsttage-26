@@ -152,7 +152,7 @@ export default function KuenstlerPortalPage() {
   const [bilder, setBilder] = useState<Bild[]>([]);
   const [alleKuenstler, setAlleKuenstler] = useState<Kuenstler[]>([]);
   const [showBildForm, setShowBildForm] = useState(false);
-  const [bildForm, setBildForm] = useState({ bildtitel: "", bildtechnik: "", genre: "Landschaft" as Genre, breite_rahmen_cm: "", hoehe_rahmen_cm: "", einlieferungspreis: "", anmerkung_bild: "", abrechnungsempf: "Künstler", galerist_id: "" });
+  const [bildForm, setBildForm] = useState({ bildtitel: "", bildtechnik: "", genre: "Landschaft" as Genre, breite_rahmen_cm: "", hoehe_rahmen_cm: "", einlieferungspreis: "", anmerkung_bild: "", abrechnungsempf: "Künstler", galerist_id: "", in_ausstellung: true });
   const [bildFehler, setBildFehler] = useState("");
   const [bildLaden, setBildLaden] = useState(false);
 
@@ -217,9 +217,10 @@ export default function KuenstlerPortalPage() {
         anmerkung_bild: bildForm.anmerkung_bild || undefined,
         abrechnungsempf: bildForm.abrechnungsempf,
         galerist_id: bildForm.abrechnungsempf === "Galerist" && bildForm.galerist_id ? Number(bildForm.galerist_id) : undefined,
+        in_ausstellung: bildForm.in_ausstellung,
       });
       setBilder(prev => [...prev, neuesBild]);
-      setBildForm({ bildtitel: "", bildtechnik: "", genre: "Landschaft", breite_rahmen_cm: "", hoehe_rahmen_cm: "", einlieferungspreis: "", anmerkung_bild: "", abrechnungsempf: "Künstler", galerist_id: "" });
+      setBildForm({ bildtitel: "", bildtechnik: "", genre: "Landschaft", breite_rahmen_cm: "", hoehe_rahmen_cm: "", einlieferungspreis: "", anmerkung_bild: "", abrechnungsempf: "Künstler", galerist_id: "", in_ausstellung: true });
       setShowBildForm(false);
     } catch (err: any) { setBildFehler(err.message); }
     finally { setBildLaden(false); }
@@ -562,6 +563,17 @@ export default function KuenstlerPortalPage() {
                 </div>
               )}
             </div>
+              <div className="col-span-2">
+                <label className="flex items-start gap-2 text-sm text-gray-700 cursor-pointer">
+                  <input type="checkbox" checked={bildForm.in_ausstellung}
+                    onChange={e => setBildForm(f => ({...f, in_ausstellung: e.target.checked}))}
+                    className="mt-0.5 rounded" />
+                  <span>
+                    <strong>Werk ist vor Ort bei der Ausstellung</strong>
+                    <span className="block text-gray-400 text-xs mt-0.5">Deaktivieren, wenn das Werk nur im Online-Katalog erscheinen soll (nicht physisch ausgestellt und nicht vor Ort kaufbar)</span>
+                  </span>
+                </label>
+              </div>
             {bildFehler && <p className="text-red-600 text-sm">{bildFehler}</p>}
             <button type="submit" disabled={bildLaden}
               className="bg-lions-blue text-white px-6 py-2 rounded-md text-sm font-medium hover:bg-blue-900 disabled:opacity-50">

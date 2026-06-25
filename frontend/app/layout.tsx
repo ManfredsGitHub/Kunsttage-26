@@ -17,7 +17,7 @@ export const metadata: Metadata = {
     default: "Kunsttage auf der Ludwigshöhe 2026",
     template: "%s | Kunsttage auf der Ludwigshöhe",
   },
-  description: "Kunstausstellung und Benefizveranstaltung im Schloss Villa Ludwigshöhe, Edenkoben – organisiert von den Lions Clubs der Südpfalz.",
+  description: "Kunstausstellung und Benefizveranstaltung im Schloss Villa Ludwigshöhe, Edenkoben – organisiert von den Lions Clubs aus der Pfalz.",
   metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000"),
   openGraph: {
     siteName: "Kunsttage auf der Ludwigshöhe",
@@ -41,7 +41,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           </div>
           <main className="max-w-6xl mx-auto px-4 py-8">{children}</main>
           <footer className="mt-16 py-6 text-center text-sm text-gray-400 border-t print:hidden">
-            <p>Kunsttage auf der Ludwigshöhe · Eine Benefizveranstaltung der Lions Clubs der Südpfalz · Alle Erlöse für gemeinnützige Zwecke</p>
+            <p>Kunsttage auf der Ludwigshöhe · Eine Benefizveranstaltung der Lions Clubs aus der Pfalz · Alle Erlöse für gemeinnützige Zwecke</p>
             <p className="mt-2 flex items-center justify-center gap-4">
               <Link href="/impressum" className="hover:text-gray-600 underline underline-offset-2">Impressum</Link>
               <Link href="/datenschutz" className="hover:text-gray-600 underline underline-offset-2">Datenschutz</Link>

@@ -8,6 +8,7 @@ const kacheln = [
   { href: "/admin/kaufuebersicht", titel: "Kaufübersicht", beschreibung: "Alle Verkäufe & Zahlungsstatus", icon: "📋" },
   { href: "/admin/kaeufer", titel: "Käufer", beschreibung: "Käuferverwaltung & Kaufhistorie", icon: "👤" },
   { href: "/admin/archiv", titel: "Archivierung", beschreibung: "Nummernkreis exportieren & archivieren", icon: "🗄️" },
+  { href: "/admin/kaufanfragen", titel: "Kaufanfragen", beschreibung: "Online-Kaufabsichten & Versandabwicklung", icon: "🛒" },
   { href: "/admin/merklisten", titel: "Besucher-Merklisten", beschreibung: "Favoriten & Interesse der Besucher", icon: "♡" },
   { href: "/admin/nachrichten", titel: "Kommunikation", beschreibung: "Newsletter & Infos an Künstler", icon: "✉" },
   { href: "/admin/kuenstler", titel: "Künstler anlegen", beschreibung: "Künstler registrieren & einladen", icon: "🎨" },

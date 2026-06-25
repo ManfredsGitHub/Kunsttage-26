@@ -77,6 +77,29 @@ export interface ReservierungCreate {
   telefon?: string;
 }
 
+export type KaufanfrageStatus = "Offen" | "Kontaktiert" | "Abgeschlossen" | "Storniert";
+
+export interface Kaufanfrage {
+  id: number;
+  erstellt_am: string;
+  status: KaufanfrageStatus;
+  anrede?: string;
+  vorname: string;
+  name: string;
+  email: string;
+  telefon?: string;
+  strasse: string;
+  plz: string;
+  ort: string;
+  land: string;
+  anmerkung?: string;
+  bild_id: number;
+  bild_nr?: string;
+  bildtitel?: string;
+  verkaufspreis?: number;
+  kuenstler?: string;
+}
+
 export interface KaufDetail extends Kauf {
   bildtechnik?: string;
   genre?: string;
