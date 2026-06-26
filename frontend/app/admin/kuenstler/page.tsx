@@ -32,6 +32,7 @@ function EditModal({ k, onClose, onSaved, onDeleted }: { k: Kuenstler; onClose: 
     db_facebook: k.db_facebook ?? "",
     aktiv: k.aktiv !== false,
     vor_ort_anwesend: k.vor_ort_anwesend ?? false,
+    zur_ausstellung_ansprechen: k.zur_ausstellung_ansprechen ?? false,
     abrechnungsempf: (k as any).abrechnungsempf ?? "Künstler",
     galerist_id: String((k as any).galerist_id ?? ""),
     kuenstlertyp: (k as any).kuenstlertyp ?? "vor_ort",
@@ -80,6 +81,7 @@ function EditModal({ k, onClose, onSaved, onDeleted }: { k: Kuenstler; onClose: 
         db_facebook: form.db_facebook || undefined,
         aktiv: form.aktiv,
         vor_ort_anwesend: form.vor_ort_anwesend,
+        zur_ausstellung_ansprechen: form.zur_ausstellung_ansprechen,
         abrechnungsempf: form.abrechnungsempf,
         galerist_id: form.abrechnungsempf === "Galerist" && form.galerist_id ? Number(form.galerist_id) : null,
         kuenstlertyp: form.kuenstlertyp,
@@ -315,7 +317,7 @@ function EditModal({ k, onClose, onSaved, onDeleted }: { k: Kuenstler; onClose: 
             {/* ─── Tab: Organisation ─── */}
             {tab === "orga" && (
               <>
-                <div className="flex items-center gap-8 p-4 bg-gray-50 rounded-xl">
+                <div className="flex flex-wrap items-center gap-6 p-4 bg-gray-50 rounded-xl">
                   <label className="flex items-center gap-2.5 cursor-pointer">
                     <input type="checkbox" checked={form.aktiv} onChange={e => setForm({...form, aktiv: e.target.checked})}
                       className="w-4 h-4 rounded accent-lions-blue" />
@@ -326,6 +328,13 @@ function EditModal({ k, onClose, onSaved, onDeleted }: { k: Kuenstler; onClose: 
                       className="w-4 h-4 rounded accent-lions-blue" />
                     <span className={`text-sm font-medium ${form.vor_ort_anwesend ? "text-lions-blue" : "text-gray-700"}`}>
                       Vor Ort anwesend
+                    </span>
+                  </label>
+                  <label className="flex items-center gap-2.5 cursor-pointer">
+                    <input type="checkbox" checked={form.zur_ausstellung_ansprechen} onChange={e => setForm({...form, zur_ausstellung_ansprechen: e.target.checked})}
+                      className="w-4 h-4 rounded accent-lions-blue" />
+                    <span className={`text-sm font-medium ${form.zur_ausstellung_ansprechen ? "text-lions-blue" : "text-gray-700"}`}>
+                      Zur Ausstellung ansprechen
                     </span>
                   </label>
                 </div>
@@ -514,6 +523,7 @@ export default function AdminKuenstlerPage() {
   const [showNeu, setShowNeu] = useState(false);
   const [nurMitEmail, setNurMitEmail] = useState(false);
   const [nurAnwesend, setNurAnwesend] = useState(false);
+  const [nurAnsprechen, setNurAnsprechen] = useState(false);
   const [nurMitBildern, setNurMitBildern] = useState(false);
   const [mitInaktiven, setMitInaktiven] = useState(false);
   const [editNrId, setEditNrId] = useState<number | null>(null);
@@ -545,6 +555,7 @@ export default function AdminKuenstlerPage() {
     return kuenstler
       .filter(k => !nurMitEmail || !!k.db_email)
       .filter(k => !nurAnwesend || !!k.vor_ort_anwesend)
+      .filter(k => !nurAnsprechen || !!k.zur_ausstellung_ansprechen)
       .filter(k => !nurMitBildern || (bilderByKuenstler[k.id]?.length ?? 0) > 0)
       .filter(k => {
         if (!suche) return true;
@@ -560,7 +571,7 @@ export default function AdminKuenstlerPage() {
         }
         return `${a.db_name}${a.db_vorname}`.localeCompare(`${b.db_name}${b.db_vorname}`);
       });
-  }, [kuenstler, suche, nurMitEmail, nurAnwesend, nurMitBildern, bilderByKuenstler, sortNr]);
+  }, [kuenstler, suche, nurMitEmail, nurAnwesend, nurAnsprechen, nurMitBildern, bilderByKuenstler, sortNr]);
 
   function handleSaved(updated: Kuenstler) {
     setKuenstler(prev => prev.map(k => k.id === updated.id ? { ...k, ...updated } : k));
@@ -584,7 +595,7 @@ export default function AdminKuenstlerPage() {
     }
   }
 
-  async function toggleFeld(k: Kuenstler, feld: "vor_ort_anwesend" | "aktiv", e: React.MouseEvent) {
+  async function toggleFeld(k: Kuenstler, feld: "vor_ort_anwesend" | "aktiv" | "zur_ausstellung_ansprechen", e: React.MouseEvent) {
     e.stopPropagation();
     const neuerWert = !k[feld];
     setKuenstler(prev => prev.map(x => x.id === k.id ? { ...x, [feld]: neuerWert } : x));
@@ -703,6 +714,15 @@ export default function AdminKuenstlerPage() {
         <label className="flex items-center gap-2 text-sm text-gray-600 cursor-pointer select-none">
           <input
             type="checkbox"
+            checked={nurAnsprechen}
+            onChange={e => setNurAnsprechen(e.target.checked)}
+            className="rounded accent-lions-blue"
+          />
+          Zur Ausstellung ansprechen
+        </label>
+        <label className="flex items-center gap-2 text-sm text-gray-600 cursor-pointer select-none">
+          <input
+            type="checkbox"
             checked={nurMitBildern}
             onChange={e => setNurMitBildern(e.target.checked)}
             className="rounded accent-lions-blue"
@@ -719,6 +739,19 @@ export default function AdminKuenstlerPage() {
           Auch Inaktive
         </label>
         <span className="text-sm text-gray-400">{sichtbar.length} von {kuenstler.length}</span>
+        {nurAnsprechen && (() => {
+          const emails = sichtbar.filter(k => !!k.db_email).map(k => k.db_email!);
+          if (emails.length === 0) return null;
+          return (
+            <button
+              onClick={() => navigator.clipboard.writeText(emails.join(", "))}
+              className="ml-2 px-3 py-1.5 text-xs bg-lions-blue text-white rounded-lg hover:bg-blue-900 transition-colors flex items-center gap-1.5"
+              title={`${emails.length} E-Mail-Adressen in die Zwischenablage`}
+            >
+              ✉ BCC kopieren ({emails.length})
+            </button>
+          );
+        })()}
       </div>
 
       {/* Bilder-Popover */}
@@ -778,6 +811,7 @@ export default function AdminKuenstlerPage() {
               <th className="px-3 py-2 text-left whitespace-nowrap">Beruf</th>
               <th className="px-3 py-2 text-left whitespace-nowrap">Webseite</th>
               <th className="px-3 py-2 text-center whitespace-nowrap">Anwesend</th>
+              <th className="px-3 py-2 text-center whitespace-nowrap">Ansprechen</th>
               <th className="px-3 py-2 text-center whitespace-nowrap">Aktiv</th>
             </tr>
           </thead>
@@ -846,6 +880,11 @@ export default function AdminKuenstlerPage() {
                 <td className="px-3 py-2 text-center" onClick={e => toggleFeld(k, "vor_ort_anwesend", e)}>
                   <span className={`text-base cursor-pointer select-none ${k.vor_ort_anwesend ? "text-green-600 hover:text-red-400" : "text-gray-300 hover:text-green-500"}`}>
                     {k.vor_ort_anwesend ? "✓" : "—"}
+                  </span>
+                </td>
+                <td className="px-3 py-2 text-center" onClick={e => toggleFeld(k, "zur_ausstellung_ansprechen", e)}>
+                  <span className={`text-base cursor-pointer select-none ${k.zur_ausstellung_ansprechen ? "text-lions-blue hover:text-red-400" : "text-gray-300 hover:text-lions-blue"}`}>
+                    {k.zur_ausstellung_ansprechen ? "✓" : "—"}
                   </span>
                 </td>
                 <td className="px-3 py-2 text-center" onClick={e => toggleFeld(k, "aktiv", e)}>

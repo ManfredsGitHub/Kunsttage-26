@@ -83,6 +83,7 @@ class Kuenstler(KuenstlerBase, table=True):
     login_token_expiry: Optional[datetime] = None
     aktiv: bool = True
     vor_ort_anwesend: bool = False
+    zur_ausstellung_ansprechen: bool = False
     abrechnungsempf: Abrechnungsempfaenger = Field(default=Abrechnungsempfaenger.kuenstler)
     galerist_id: Optional[int] = Field(default=None, foreign_key="kuenstler.id")
     bilder: List["Bild"] = Relationship(back_populates="kuenstler")
@@ -107,6 +108,7 @@ class KuenstlerPublic(KuenstlerBase):
     portrait_foto: Optional[str] = None
     aktiv: bool = True
     vor_ort_anwesend: bool = False
+    zur_ausstellung_ansprechen: bool = False
     abrechnungsempf: Abrechnungsempfaenger = Abrechnungsempfaenger.kuenstler
     galerist_id: Optional[int] = None
 

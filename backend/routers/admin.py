@@ -227,10 +227,12 @@ def druckliste(session: Session = Depends(get_session)):
 # --- Übersichten ---
 
 @router.get("/kuenstler/alle", response_model=list[KuenstlerPublic])
-def alle_kuenstler(mit_inaktiven: bool = False, session: Session = Depends(get_session)):
+def alle_kuenstler(mit_inaktiven: bool = False, nur_ansprechen: bool = False, session: Session = Depends(get_session)):
     q = select(Kuenstler).order_by(Kuenstler.db_name)
     if not mit_inaktiven:
         q = q.where(Kuenstler.aktiv == True)
+    if nur_ansprechen:
+        q = q.where(Kuenstler.zur_ausstellung_ansprechen == True)
     return session.exec(q).all()
 
 
@@ -350,7 +352,7 @@ def kuenstler_aktualisieren(kuenstler_id: int, daten: dict = Body(...), session:
     felder = ["db_name","db_vorname","db_email","db_telefon","db_adresse","db_plz","db_ort",
               "db_beruf","db_leben","db_lebenstext","db_kommentar","db_inspiration","db_ausstellungen",
               "db_instagram","db_facebook","db_webseite","aktiv","vor_ort_anwesend","kuenstler_nr",
-              "abrechnungsempf","galerist_id","kuenstlertyp"]
+              "abrechnungsempf","galerist_id","kuenstlertyp","zur_ausstellung_ansprechen"]
     for f in felder:
         if f in daten:
             setattr(k, f, daten[f])
