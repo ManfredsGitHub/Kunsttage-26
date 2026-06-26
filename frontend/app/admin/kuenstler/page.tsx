@@ -739,6 +739,15 @@ export default function AdminKuenstlerPage() {
           Auch Inaktive
         </label>
         <span className="text-sm text-gray-400">{sichtbar.length} von {kuenstler.length}</span>
+        <a
+          href="/admin/kuenstler/druckliste"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="ml-1 px-3 py-1.5 text-xs bg-gray-100 text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-200 transition-colors flex items-center gap-1.5"
+          title="Künstlerliste drucken (alle mit E-Mail, inkl. inaktive)"
+        >
+          🖨 Druckliste
+        </a>
         {nurAnsprechen && (() => {
           const emails = sichtbar.filter(k => !!k.db_email).map(k => k.db_email!);
           if (emails.length === 0) return null;
