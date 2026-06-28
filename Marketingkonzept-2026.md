@@ -266,6 +266,29 @@ August       September        Oktober          November
 
 ---
 
+## Bildrechte und Copyright
+
+**Villa Ludwigshöhe (Hauptbild)**
+Das Panoramafoto der Villa Ludwigshöhe steht unter folgendem Copyright:
+
+> © GDKE, E. Fischer
+
+Dieser Hinweis ist **bei jeder Verwendung des Bildes zwingend** anzugeben — ohne Ausnahme.
+
+Bereits korrekt eingetragen:
+- Startseite (www.Kunsttage-Ludwigshoehe.de)
+- Veranstaltungsseite
+- PDF-Einladungsschreiben (Anhang unter dem Bannerfoto)
+
+**Prüfen vor jeder Neuverwendung:**
+- Social-Media-Posts mit dem Villa-Bild → Copyright in Bildbeschreibung oder Alt-Text
+- Druckmaterialien (Plakate, Handzettel) → Copyright im Kleingedruckten
+- Präsentationen / Pressemitteilungen → Copyright-Zeile unter dem Bild
+
+**Grundsatz:** Keine Veröffentlichung des Villa-Fotos ohne `© GDKE, E. Fischer`.
+
+---
+
 ## Aufwandseinschätzung
 
 | Maßnahme | Zeitaufwand | Kosten |
