@@ -83,6 +83,8 @@ def kauf_erfassen(data: KaufCreate, session: Session = Depends(get_session)):
         raise HTTPException(404, "Bild nicht gefunden")
     if bild.verfuegbarkeit == Verfuegbarkeit.verkauft:
         raise HTTPException(409, "Bild bereits verkauft")
+    if bild.verfuegbarkeit == Verfuegbarkeit.nicht_verfuegbar:
+        raise HTTPException(409, "Bild ist nicht zum Verkauf verfügbar")
 
     kauf = Kauf.model_validate(data)
     session.add(kauf)

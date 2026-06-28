@@ -6,7 +6,7 @@ import { Bild, Kuenstler } from "@/lib/types";
 import { formatBildNr } from "@/lib/utils";
 
 const GENRES = ["Abstrakt","Akt","Landschaft","Menschen","Pfalz","Portrait","Städte","Stilleben","Sonstiges"];
-type Filter = "alle" | "offen" | "mit_foto" | "ohne_foto" | "online" | "verfuegbar" | "reserviert" | "verkauft";
+type Filter = "alle" | "offen" | "mit_foto" | "ohne_foto" | "online" | "verfuegbar" | "nicht_verfuegbar" | "nachfragen" | "reserviert" | "verkauft";
 type SortKey = "kuenstler" | "titel" | "bild_nr" | "genre" | "einlieferungspreis" | "verkaufspreis";
 type SortDir = "asc" | "desc";
 
@@ -298,6 +298,7 @@ function EditModal({ bild, onClose, onSaved, onDeleted }: { bild: Bild; onClose:
     freigegeben: bild.freigegeben ?? false,
     abrechnungsempf: bild.abrechnungsempf ?? "Künstler",
     galerist_id: String(bild.galerist_id ?? ""),
+    verfuegbarkeit: bild.verfuegbarkeit ?? "Verfügbar",
   });
   const [kuenstler, setKuenstler] = useState<Kuenstler[]>([]);
   const [laden, setLaden] = useState(false);
@@ -362,6 +363,7 @@ function EditModal({ bild, onClose, onSaved, onDeleted }: { bild: Bild; onClose:
         freigegeben: form.freigegeben,
         abrechnungsempf: form.abrechnungsempf,
         galerist_id: form.abrechnungsempf === "Galerist" && form.galerist_id ? Number(form.galerist_id) : null,
+        verfuegbarkeit: form.verfuegbarkeit,
       });
       onSaved(updated);
     } catch (err: any) { setFehler(err.message); }
@@ -603,6 +605,24 @@ function EditModal({ bild, onClose, onSaved, onDeleted }: { bild: Bild; onClose:
             </div>
           </div>
 
+          <div>
+            <label className="block text-xs font-medium text-gray-600 mb-1">Verfügbarkeit</label>
+            {(form.verfuegbarkeit === "Reserviert" || form.verfuegbarkeit === "Verkauft") ? (
+              <div className="flex items-center gap-2">
+                <span className={`px-2 py-1 rounded text-xs font-medium ${
+                  form.verfuegbarkeit === "Reserviert" ? "bg-yellow-100 text-yellow-700" : "bg-red-100 text-red-700"
+                }`}>{form.verfuegbarkeit}</span>
+                <span className="text-xs text-gray-400">— wird automatisch durch Reservierung / Verkauf gesetzt</span>
+              </div>
+            ) : (
+              <select value={form.verfuegbarkeit} onChange={e => setForm({...form, verfuegbarkeit: e.target.value})} className={inp}>
+                <option value="Verfügbar">Verfügbar</option>
+                <option value="Nicht verfügbar">Nicht verfügbar (kein Verkauf, nur Anschauung)</option>
+                <option value="Verfügbarkeit nachfragen">Verfügbarkeit nachfragen (Online-Anfrage klären)</option>
+              </select>
+            )}
+          </div>
+
           {fehler && <p className="text-red-600 text-sm">{fehler}</p>}
 
           <div className="flex items-center justify-end gap-3 pt-3 border-t sticky bottom-0 bg-white pb-1">
@@ -643,9 +663,11 @@ export default function AdminBilderPage() {
       case "mit_foto":   return bilder.filter(b => !!b.bild_url_web);
       case "ohne_foto":  return bilder.filter(b => !b.bild_url_web);
       case "online":     return bilder.filter(b => b.in_ausstellung === false);
-      case "verfuegbar": return bilder.filter(b => b.verfuegbarkeit === "Verfügbar");
-      case "reserviert": return bilder.filter(b => b.verfuegbarkeit === "Reserviert");
-      case "verkauft":   return bilder.filter(b => b.verfuegbarkeit === "Verkauft");
+      case "verfuegbar":       return bilder.filter(b => b.verfuegbarkeit === "Verfügbar");
+      case "nicht_verfuegbar": return bilder.filter(b => b.verfuegbarkeit === "Nicht verfügbar");
+      case "nachfragen":       return bilder.filter(b => b.verfuegbarkeit === "Verfügbarkeit nachfragen");
+      case "reserviert":       return bilder.filter(b => b.verfuegbarkeit === "Reserviert");
+      case "verkauft":         return bilder.filter(b => b.verfuegbarkeit === "Verkauft");
       default:          return bilder;
     }
   }, [bilder, filter]);
@@ -783,9 +805,11 @@ export default function AdminBilderPage() {
     { key: "mit_foto",   label: "Mit Foto",          count: mitFotoCount },
     { key: "ohne_foto",  label: "Ohne Foto",         count: bilder.filter(b => !b.bild_url_web).length },
     { key: "online",     label: "Nur Online",        count: bilder.filter(b => b.in_ausstellung === false).length },
-    { key: "verfuegbar", label: "Verfügbar",         count: bilder.filter(b => b.verfuegbarkeit === "Verfügbar").length, color: "green" },
-    { key: "reserviert", label: "Reserviert",        count: bilder.filter(b => b.verfuegbarkeit === "Reserviert").length, color: "yellow" },
-    { key: "verkauft",   label: "Verkauft",          count: bilder.filter(b => b.verfuegbarkeit === "Verkauft").length, color: "red" },
+    { key: "verfuegbar",       label: "Verfügbar",           count: bilder.filter(b => b.verfuegbarkeit === "Verfügbar").length, color: "green" },
+    { key: "nicht_verfuegbar", label: "Nicht verfügbar",     count: bilder.filter(b => b.verfuegbarkeit === "Nicht verfügbar").length, color: "gray" },
+    { key: "nachfragen",       label: "Nachfragen",          count: bilder.filter(b => b.verfuegbarkeit === "Verfügbarkeit nachfragen").length, color: "blue" },
+    { key: "reserviert",       label: "Reserviert",          count: bilder.filter(b => b.verfuegbarkeit === "Reserviert").length, color: "yellow" },
+    { key: "verkauft",         label: "Verkauft",            count: bilder.filter(b => b.verfuegbarkeit === "Verkauft").length, color: "red" },
   ];
 
   return (
@@ -1017,10 +1041,12 @@ export default function AdminBilderPage() {
                 </td>
                 <td className="px-2 py-1.5 text-center">
                   <span className={`text-xs px-2 py-0.5 rounded-full ${
-                    b.verfuegbarkeit === "Verfügbar"  ? "bg-green-100 text-green-700" :
-                    b.verfuegbarkeit === "Reserviert" ? "bg-yellow-100 text-yellow-700" :
+                    b.verfuegbarkeit === "Verfügbar"                ? "bg-green-100 text-green-700" :
+                    b.verfuegbarkeit === "Nicht verfügbar"          ? "bg-gray-100 text-gray-600" :
+                    b.verfuegbarkeit === "Verfügbarkeit nachfragen" ? "bg-blue-100 text-blue-700" :
+                    b.verfuegbarkeit === "Reserviert"               ? "bg-yellow-100 text-yellow-700" :
                     "bg-red-100 text-red-700"
-                  }`}>{b.verfuegbarkeit}</span>
+                  }`}>{b.verfuegbarkeit === "Verfügbarkeit nachfragen" ? "Nachfragen" : b.verfuegbarkeit}</span>
                   <div className="mt-1">
                     <button
                       onClick={() => handleAusstellungToggle(b.id, !(b.in_ausstellung !== false))}

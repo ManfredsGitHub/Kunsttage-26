@@ -92,6 +92,7 @@ class BildUpdate(BaseModel):
     freigegeben: Optional[bool] = None
     abrechnungsempf: Optional[Abrechnungsempfaenger] = None
     galerist_id: Optional[int] = None
+    verfuegbarkeit: Optional[Verfuegbarkeit] = None
 
 
 @router.patch("/bilder/{bild_id}", response_model=BildPublic)

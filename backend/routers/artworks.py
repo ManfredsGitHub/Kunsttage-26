@@ -23,7 +23,11 @@ def list_bilder(
 ):
     q = select(Bild).where(Bild.freigegeben == True, Bild.bild_url_web != None)
     if nur_verfuegbar:
-        q = q.where(Bild.verfuegbarkeit == Verfuegbarkeit.verfuegbar)
+        q = q.where(Bild.verfuegbarkeit.in_([
+            Verfuegbarkeit.verfuegbar,
+            Verfuegbarkeit.nicht_verfuegbar,
+            Verfuegbarkeit.nachfragen,
+        ]))
     if genre:
         q = q.where(Bild.genre == genre)
     if technik:

@@ -1,4 +1,4 @@
-export type Verfuegbarkeit = "Verfügbar" | "Reserviert" | "Verkauft";
+export type Verfuegbarkeit = "Verfügbar" | "Nicht verfügbar" | "Verfügbarkeit nachfragen" | "Reserviert" | "Verkauft";
 export type Genre =
   | "Abstrakt" | "Akt" | "Landschaft" | "Menschen"
   | "Pfalz" | "Portrait" | "Städte" | "Stilleben" | "Sonstiges";

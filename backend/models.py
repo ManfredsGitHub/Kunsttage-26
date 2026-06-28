@@ -18,6 +18,8 @@ class Genre(str, Enum):
 
 class Verfuegbarkeit(str, Enum):
     verfuegbar = "Verfügbar"
+    nicht_verfuegbar = "Nicht verfügbar"
+    nachfragen = "Verfügbarkeit nachfragen"
     reserviert = "Reserviert"
     verkauft = "Verkauft"
 
