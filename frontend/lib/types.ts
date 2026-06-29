@@ -40,6 +40,8 @@ export interface Bild {
   bild_nr: string;
   bildtitel: string;
   anmerkung_bild?: string;
+  ki_beschreibung?: string;
+  ki_hook?: string;
   bildtechnik: string;
   genre: Genre;
   anzahl: number;

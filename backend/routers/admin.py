@@ -623,9 +623,13 @@ async def ai_beschreibung_generieren(bild_id: int, session: Session = Depends(ge
     )
     kuenstler_aussage = kuenstler.db_kommentar if kuenstler else None
 
-    prompt = f"""Du bist ein erfahrener Kunstkritiker und Marketing-Texter für eine Benefiz-Kunstausstellung.
+    prompt = f"""Du bist ein erfahrener Kunstkritiker und Marketing-Texter für eine Benefiz-Kunstausstellung (Lions Club, Pfalz).
 
-Schreibe eine kurze, einladende Beschreibung (2–3 Sätze) für folgendes Kunstwerk, die auf der Ausstellungswebsite veröffentlicht wird. Der Text soll neugierig machen und das Werk lebendig beschreiben. Kein Verkaufsaufruf, kein Hinweis auf Kauf oder guten Zweck am Ende.
+Erstelle für folgendes Kunstwerk zwei Texte:
+
+1. HOOK: Ein einziger kurzer, rätselhafter oder poetischer Satz (max. 8 Wörter), der auf Instagram den Daumen stoppt. Er kann sich auf den Titel beziehen, auf das Motiv, auf eine Stimmung — aber er darf das Werk nicht erklären, nur neugierig machen.
+
+2. BESCHREIBUNG: 2–3 einladende Sätze für die Ausstellungswebsite. Lebendig, atmosphärisch. Kein Verkaufsaufruf, kein Hinweis auf Kauf oder guten Zweck.
 
 Kunstwerk:
 - Titel: {bild.bildtitel}
@@ -635,7 +639,10 @@ Kunstwerk:
 - Maße: {abmasse}
 {f"- Aussage des Künstlers: {kuenstler_aussage}" if kuenstler_aussage else ""}
 
-Gib nur den fertigen Beschreibungstext aus, ohne Überschrift, Einleitung oder Erklärungen. Sprache: Deutsch."""
+Antworte ausschließlich in diesem JSON-Format (kein Markdown, keine Erklärungen):
+{{"hook": "...", "beschreibung": "..."}}
+
+Sprache: Deutsch."""
 
     content: list = []
 
@@ -663,11 +670,27 @@ Gib nur den fertigen Beschreibungstext aus, ohne Überschrift, Einleitung oder E
     client = anthropic.Anthropic(api_key=api_key)
     response = client.messages.create(
         model="claude-sonnet-4-6",
-        max_tokens=400,
+        max_tokens=500,
         messages=[{"role": "user", "content": content}],
     )
 
-    return {"beschreibung": response.content[0].text.strip()}
+    import json as _json
+    raw = response.content[0].text.strip()
+    try:
+        parsed = _json.loads(raw)
+        hook = parsed.get("hook", "").strip()
+        beschreibung = parsed.get("beschreibung", "").strip()
+    except _json.JSONDecodeError:
+        # Fallback: alles als Beschreibung behandeln
+        hook = ""
+        beschreibung = raw
+
+    bild.ki_hook = hook
+    bild.ki_beschreibung = beschreibung
+    session.add(bild)
+    session.commit()
+
+    return {"hook": hook, "beschreibung": beschreibung}
 
 
 # ── Nutzerverwaltung ──────────────────────────────────────────────────────────

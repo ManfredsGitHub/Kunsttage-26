@@ -310,6 +310,7 @@ function EditModal({ bild, onClose, onSaved, onDeleted }: { bild: Bild; onClose:
   const [fotoUrl, setFotoUrl] = useState(bild.bild_url_web ?? "");
   const [fotoLaedt, setFotoLaedt] = useState(false);
   const [aiLaedt, setAiLaedt] = useState(false);
+  const [kiHook, setKiHook] = useState(bild.ki_hook ?? "");
   const [zusatzFotos, setZusatzFotos] = useState<BildFoto[]>([]);
   const [zusatzLaedt, setZusatzLaedt] = useState(false);
   const [lightboxUrl, setLightboxUrl] = useState<string | null>(null);
@@ -496,10 +497,11 @@ function EditModal({ bild, onClose, onSaved, onDeleted }: { bild: Bild; onClose:
                   onClick={async () => {
                     setAiLaedt(true);
                     try {
-                      const { beschreibung } = await aiBeschreibungGenerieren(bild.id);
+                      const { hook, beschreibung } = await aiBeschreibungGenerieren(bild.id);
+                      setKiHook(hook);
                       setForm(f => ({ ...f, anmerkung_bild: beschreibung }));
-                    } catch (err: any) {
-                      setFehler("KI-Fehler: " + err.message);
+                    } catch (err: unknown) {
+                      setFehler("KI-Fehler: " + (err instanceof Error ? err.message : String(err)));
                     } finally {
                       setAiLaedt(false);
                     }
@@ -509,10 +511,15 @@ function EditModal({ bild, onClose, onSaved, onDeleted }: { bild: Bild; onClose:
                   {aiLaedt ? (
                     <><span className="animate-spin inline-block">✦</span> Generiere…</>
                   ) : (
-                    <>✦ KI-Beschreibung</>
+                    <>✦ KI & Hook</>
                   )}
                 </button>
               </div>
+              {kiHook && (
+                <div className="mb-1.5 px-2.5 py-1.5 rounded-md bg-violet-50 border border-violet-200 text-xs text-violet-800 flex items-center gap-1.5">
+                  <span className="font-semibold">Hook:</span> „{kiHook}"
+                </div>
+              )}
               <textarea rows={3} value={form.anmerkung_bild} onChange={e => setForm({...form, anmerkung_bild: e.target.value})} className={inp} placeholder="Beschreibung für die Webseite…" />
             </div>
             <div>

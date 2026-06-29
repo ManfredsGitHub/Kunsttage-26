@@ -172,7 +172,7 @@ export const bildLoeschen = (id: number) =>
   req(`/admin/bilder/${id}`, { method: "DELETE" });
 
 export const aiBeschreibungGenerieren = (id: number) =>
-  req<{ beschreibung: string }>(`/admin/bilder/${id}/ai-beschreibung`, { method: "POST" });
+  req<{ hook: string; beschreibung: string }>(`/admin/bilder/${id}/ai-beschreibung`, { method: "POST" });
 
 export const getZusatzFotos = (id: number) =>
   req<import("./types").BildFoto[]>(`/admin/bilder/${id}/fotos`);

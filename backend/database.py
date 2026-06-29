@@ -127,6 +127,12 @@ def create_db():
                 con.exec_driver_sql("ALTER TABLE kaufanfrage ADD COLUMN land TEXT DEFAULT 'Deutschland'")
         except Exception:
             pass
+        # KI-Felder auf bild-Tabelle
+        bild_cols = [r[1] for r in con.exec_driver_sql("PRAGMA table_info(bild)")]
+        if "ki_beschreibung" not in bild_cols:
+            con.exec_driver_sql("ALTER TABLE bild ADD COLUMN ki_beschreibung TEXT")
+        if "ki_hook" not in bild_cols:
+            con.exec_driver_sql("ALTER TABLE bild ADD COLUMN ki_hook TEXT")
         # Einstellung-Tabelle wird durch SQLModel.metadata.create_all angelegt
         con.commit()
 
