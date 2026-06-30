@@ -7,7 +7,8 @@ export default function KeyboardShortcuts() {
 
   useEffect(() => {
     function onKeyDown(e: KeyboardEvent) {
-      if (!e.ctrlKey || e.shiftKey || e.altKey || e.metaKey) return;
+      // Alt+Key — kein Konflikt mit Browser-Shortcuts (Ctrl+A = Alles auswählen, Ctrl+B = Fett)
+      if (!e.altKey || e.ctrlKey || e.shiftKey || e.metaKey) return;
       const tag = (document.activeElement?.tagName ?? "").toLowerCase();
       const editable = document.activeElement?.getAttribute("contenteditable");
       if (tag === "input" || tag === "textarea" || tag === "select" || editable === "true") return;

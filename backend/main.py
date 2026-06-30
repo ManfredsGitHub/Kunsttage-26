@@ -10,6 +10,7 @@ load_dotenv()
 
 from database import create_db
 from routers import artworks, reservations, sales, artists, admin, merkliste, archive, export, auth as auth_router, einstellungen, kaufanfragen
+from routers import admin_bilder, admin_kuenstler, admin_kommunikation, admin_nutzer
 from services.auth_service import verify_token
 
 app = FastAPI(title="Kunsttage auf der Ludwigshöhe API", version="1.0.0")
@@ -25,6 +26,10 @@ app.include_router(export.router)
 app.include_router(auth_router.router)
 app.include_router(einstellungen.router)
 app.include_router(kaufanfragen.router)
+app.include_router(admin_bilder.router)
+app.include_router(admin_kuenstler.router)
+app.include_router(admin_kommunikation.router)
+app.include_router(admin_nutzer.router)
 
 # ── Auth-Middleware ───────────────────────────────────────────────────────────
 # Pfade, die ohne JWT erreichbar sind

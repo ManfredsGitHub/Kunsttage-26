@@ -38,6 +38,8 @@ def validate_password_strength(pw: str) -> list[str]:
         errors.append("Mindestens 10 Zeichen erforderlich")
     if not any(c.isupper() for c in pw):
         errors.append("Mindestens ein Großbuchstabe erforderlich")
+    if not any(c.islower() for c in pw):
+        errors.append("Mindestens ein Kleinbuchstabe erforderlich")
     if not any(c.isdigit() for c in pw):
         errors.append("Mindestens eine Ziffer erforderlich")
     if not any(c in "!@#$%^&*()_+-=[]{}|;':\",./<>?" for c in pw):

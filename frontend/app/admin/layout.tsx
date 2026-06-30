@@ -3,41 +3,21 @@ import { useEffect, useState } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import Link from "next/link";
 import { getRolle, logout } from "@/lib/auth";
+import { ADMIN_NAV } from "@/lib/adminNav";
 
-interface Crumb {
-  label: string;
-  href: string;
+function buildCrumbs(path: string): Array<{ label: string; href: string }> {
+  const entry = ADMIN_NAV.find(e => e.href === path);
+  if (!entry) return [];
+  const result: Array<{ label: string; href: string }> = [];
+  if (entry.crumbParent) {
+    const parent = ADMIN_NAV.find(e => e.href === entry.crumbParent);
+    if (parent) {
+      result.push({ label: parent.crumbLabel ?? parent.label, href: parent.href });
+    }
+  }
+  result.push({ label: entry.crumbLabel ?? entry.label, href: entry.href });
+  return result;
 }
-
-const CRUMBS: Record<string, Crumb[]> = {
-  // Direkte Dashboard-Kinder
-  "/admin/kuenstler":      [{ label: "Künstler anlegen & pflegen", href: "/admin/kuenstler" }],
-  "/admin/bilder":         [{ label: "Bildverwaltung", href: "/admin/bilder" }],
-  "/admin/merklisten":     [{ label: "Besucher-Merklisten", href: "/admin/merklisten" }],
-  "/admin/kaufanfragen":   [{ label: "Kaufanfragen", href: "/admin/kaufanfragen" }],
-  "/admin/kasse":          [{ label: "Vor-Ort-Kasse", href: "/admin/kasse" }],
-  "/admin/kaeufer":        [{ label: "Käufer", href: "/admin/kaeufer" }],
-  "/admin/kaufuebersicht": [{ label: "Kaufübersicht", href: "/admin/kaufuebersicht" }],
-  "/admin/going-live":        [{ label: "Going Live", href: "/admin/going-live" }],
-  "/admin/org-abwicklung":    [{ label: "Organisation und Abwicklung", href: "/admin/org-abwicklung" }],
-  "/admin/nachrichten":    [{ label: "Kommunikation", href: "/admin/nachrichten" }],
-  "/admin/benutzer":       [{ label: "Benutzerverwaltung", href: "/admin/benutzer" }],
-  "/admin/einstellungen":  [{ label: "Einstellungen", href: "/admin/einstellungen" }],
-
-  // Organisation
-  "/admin/organisation":      [{ label: "Organisation", href: "/admin/organisation" }],
-  "/admin/plaetze":           [{ label: "Organisation", href: "/admin/organisation" }, { label: "Platzplan", href: "/admin/plaetze" }],
-  "/admin/raumplan":          [{ label: "Organisation", href: "/admin/organisation" }, { label: "Raumplan", href: "/admin/raumplan" }],
-  "/admin/bilder/aufsteller": [{ label: "Organisation", href: "/admin/organisation" }, { label: "Bildaufsteller", href: "/admin/bilder/aufsteller" }],
-
-  // Sonstiges
-  "/admin/sonstiges":   [{ label: "Sonstiges", href: "/admin/sonstiges" }],
-  "/admin/export":      [{ label: "Sonstiges", href: "/admin/sonstiges" }, { label: "DATEV-Export", href: "/admin/export" }],
-  "/admin/import":      [{ label: "Sonstiges", href: "/admin/sonstiges" }, { label: "CSV / Excel Import", href: "/admin/import" }],
-  "/admin/archiv":      [{ label: "Sonstiges", href: "/admin/sonstiges" }, { label: "Archivierung", href: "/admin/archiv" }],
-  "/admin/impressum":   [{ label: "Sonstiges", href: "/admin/sonstiges" }, { label: "Impressum", href: "/admin/impressum" }],
-  "/admin/datenschutz": [{ label: "Sonstiges", href: "/admin/sonstiges" }, { label: "Datenschutz", href: "/admin/datenschutz" }],
-};
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const [rolle, setRolle] = useState<string | null>(null);
@@ -60,7 +40,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     router.push("/admin/login");
   }
 
-  const crumbs = CRUMBS[pathname] ?? [];
+  const crumbs = buildCrumbs(pathname);
   const rolleLabel =
     rolle === "admin" ? "Admin"
     : rolle === "orga" ? "Orga-Team"
