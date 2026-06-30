@@ -89,7 +89,7 @@ export default function DrucklistePage() {
                 <td className="col-vorname">{k.db_vorname}</td>
                 <td className="col-email">{k.db_email}</td>
                 <td className="col-tel">{k.db_telefon || ""}</td>
-                <td className="col-center">{k.kuenstlertyp === "Galerist" ? "G" : "K"}</td>
+                <td className="col-center">{k.kuenstlertyp === "galerist" ? "G" : "K"}</td>
                 <td className="col-center">{k.aktiv ? "✓" : <span className="inaktiv">–</span>}</td>
                 <td className="col-center">{k.vor_ort_anwesend ? "✓" : ""}</td>
                 <td className="col-center">{k.zur_ausstellung_ansprechen ? "✓" : ""}</td>

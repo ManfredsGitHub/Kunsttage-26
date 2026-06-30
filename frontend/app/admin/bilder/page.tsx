@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useState, useMemo, useRef } from "react";
 import { getAlleBilder, massenFreigeben, bilderFreigeben, preisSetzen, fotoHochladen, getAlleKuenstler, bildNeuAnlegen, ausstellungToggle, bildAktualisieren, bildLoeschen, aiBeschreibungGenerieren, getZusatzFotos, zusatzFotoHochladen, zusatzFotoLoeschen, kuenstlerAnlegen } from "@/lib/api";
-import { BildFoto } from "@/lib/types";
+import { BildFoto, Verfuegbarkeit } from "@/lib/types";
 import { Bild, Kuenstler } from "@/lib/types";
 import { formatBildNr } from "@/lib/utils";
 
@@ -622,7 +622,7 @@ function EditModal({ bild, onClose, onSaved, onDeleted }: { bild: Bild; onClose:
                 <span className="text-xs text-gray-400">— wird automatisch durch Reservierung / Verkauf gesetzt</span>
               </div>
             ) : (
-              <select value={form.verfuegbarkeit} onChange={e => setForm({...form, verfuegbarkeit: e.target.value})} className={inp}>
+              <select value={form.verfuegbarkeit} onChange={e => setForm({...form, verfuegbarkeit: e.target.value as Verfuegbarkeit})} className={inp}>
                 <option value="Verfügbar">Verfügbar</option>
                 <option value="Nicht verfügbar">Nicht verfügbar (kein Verkauf, nur Anschauung)</option>
                 <option value="Verfügbarkeit nachfragen">Verfügbarkeit nachfragen (Online-Anfrage klären)</option>
