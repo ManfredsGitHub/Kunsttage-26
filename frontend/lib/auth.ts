@@ -38,8 +38,9 @@ export function getNutzerId(): number | null {
 }
 
 export function setToken(token: string, stunden: number) {
+  const secure = location.protocol === "https:" ? "; Secure" : "";
   document.cookie =
-    `${COOKIE}=${encodeURIComponent(token)}; path=/; max-age=${stunden * 3600}; SameSite=Strict`;
+    `${COOKIE}=${encodeURIComponent(token)}; path=/; max-age=${stunden * 3600}; SameSite=Strict${secure}`;
 }
 
 export function logout() {
@@ -49,6 +50,33 @@ export function logout() {
 export function authHeaders(): Record<string, string> {
   const token = getToken();
   return token ? { Authorization: `Bearer ${token}` } : {};
+}
+
+// ── Künstler-Portal Auth ───────────────────────────────────────────────────────
+const KT_TOKEN_KEY = "kt_kuenstler_token";
+
+export function setKuenstlerToken(token: string): void {
+  if (typeof localStorage !== "undefined") {
+    localStorage.setItem(KT_TOKEN_KEY, token);
+  }
+}
+
+export function getKuenstlerToken(): string | null {
+  if (typeof localStorage === "undefined") return null;
+  return localStorage.getItem(KT_TOKEN_KEY);
+}
+
+export function kuenstlerAuthHeaders(): Record<string, string> {
+  const token = getKuenstlerToken();
+  return token ? { "X-Kuenstler-Token": token } : {};
+}
+
+export function logoutKuenstler(): void {
+  if (typeof localStorage !== "undefined") {
+    localStorage.removeItem(KT_TOKEN_KEY);
+    localStorage.removeItem("kuenstler_id");
+    localStorage.removeItem("kuenstler_name");
+  }
 }
 
 export function redirectNachRolle(rolle: Rolle): string {

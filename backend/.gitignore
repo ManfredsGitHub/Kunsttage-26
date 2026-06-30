@@ -1,0 +1,13 @@
+.env
+.env.*
+*.env
+*.rtf
+__pycache__/
+*.pyc
+.venv/
+uploads/
+kunsttage.db
+kunsttake.db
+*.db-shm
+*.db-wal
+archiv/

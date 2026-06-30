@@ -4,6 +4,7 @@ from fastapi.responses import JSONResponse
 from fastapi.staticfiles import StaticFiles
 from dotenv import load_dotenv
 import os
+import re
 
 load_dotenv()
 
@@ -27,9 +28,10 @@ app.include_router(kaufanfragen.router)
 
 # ── Auth-Middleware ───────────────────────────────────────────────────────────
 # Pfade, die ohne JWT erreichbar sind
-_OPEN_PREFIXES = ("/bilder", "/uploads", "/reservierungen", "/kuenstler",
+_OPEN_PREFIXES = ("/bilder", "/uploads", "/reservierungen",
                   "/merkliste", "/docs", "/openapi.json", "/redoc",
                   "/einstellungen")
+
 # Auth-Endpoints, die ohne Token aufrufbar sind (Login, Reset, Setup)
 _OPEN_EXACT = {
     "/auth/login",
@@ -39,13 +41,23 @@ _OPEN_EXACT = {
 }
 _OPEN_EXACT_PREFIX = "/auth/setup"  # GET /auth/setup/verify
 
+# Öffentliche Künstler-Endpunkte (kein Token nötig)
+_KUENSTLER_OPEN = {
+    "/kuenstler/login-link-anfordern",
+    "/kuenstler/bewerben",
+    "/kuenstler/login/verify",
+}
 
-def _is_open(path: str) -> bool:
+
+def _is_open(path: str, method: str = "GET") -> bool:
     if path == "/":
         return True
-    if path in _OPEN_EXACT:
+    if path in _OPEN_EXACT or path in _KUENSTLER_OPEN:
         return True
     if path.startswith(_OPEN_EXACT_PREFIX):
+        return True
+    # Öffentliche Künstler-Liste und Einzelprofil (nur GET, ohne Unterpfad)
+    if method == "GET" and re.match(r"^/kuenstler/?\d*/?$", path):
         return True
     return any(
         path == p or path.startswith(p + "/") or path.startswith(p + "?")
@@ -80,7 +92,11 @@ async def auth_middleware(request: Request, call_next):
     if method == "POST" and path == "/kaufanfragen/":
         return await call_next(request)
 
-    if method == "OPTIONS" or _is_open(path):
+    if method == "OPTIONS" or _is_open(path, method):
+        return await call_next(request)
+
+    # Künstler-Portal: X-Kuenstler-Token im Header → Endpunkt validiert selbst
+    if path.startswith("/kuenstler/") and request.headers.get("X-Kuenstler-Token"):
         return await call_next(request)
 
     auth = request.headers.get("Authorization", "")
@@ -134,6 +150,14 @@ app.mount("/uploads", StaticFiles(directory=UPLOAD_DIR), name="uploads")
 
 @app.on_event("startup")
 def on_startup():
+    secret = os.getenv("JWT_SECRET", "dev-secret-bitte-aendern")
+    if secret == "dev-secret-bitte-aendern":
+        import sys
+        env = os.getenv("ENVIRONMENT", "development")
+        if env == "production":
+            sys.exit("FATAL: JWT_SECRET muss in .env gesetzt werden!")
+        else:
+            print("WARNUNG: JWT_SECRET auf Default-Wert — nur für lokale Entwicklung akzeptabel!")
     create_db()
 
 

@@ -45,7 +45,12 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const pathname = usePathname();
 
   useEffect(() => {
-    setRolle(getRolle());
+    const r = getRolle();
+    if (!r && pathname !== "/admin/login") {
+      router.replace("/admin/login");
+    } else {
+      setRolle(r);
+    }
   }, [pathname]);
 
   if (pathname === "/admin/login") return <>{children}</>;

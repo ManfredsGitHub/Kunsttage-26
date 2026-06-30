@@ -1,5 +1,5 @@
 import { Bild, Kuenstler, ReservierungCreate, KaufCreate } from "./types";
-import { authHeaders } from "./auth";
+import { authHeaders, kuenstlerAuthHeaders } from "./auth";
 
 const BASE = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
 
@@ -9,6 +9,7 @@ async function req<T>(path: string, init?: RequestInit): Promise<T> {
     headers: {
       "Content-Type": "application/json",
       ...authHeaders(),
+      ...kuenstlerAuthHeaders(),
       ...(init?.headers as Record<string, string> ?? {}),
     },
   });
@@ -75,7 +76,11 @@ export const kuenstlerBildLoeschen = (kuenstlerId: number, bildId: number) =>
 export async function kuenstlerBildFotoHochladen(kuenstlerId: number, bildId: number, file: File): Promise<{ bild_url_web: string }> {
   const fd = new FormData();
   fd.append("file", file);
-  const res = await fetch(`${BASE}/kuenstler/${kuenstlerId}/bilder/${bildId}/foto`, { method: "POST", body: fd });
+  const res = await fetch(`${BASE}/kuenstler/${kuenstlerId}/bilder/${bildId}/foto`, {
+    method: "POST",
+    body: fd,
+    headers: kuenstlerAuthHeaders(),
+  });
   if (!res.ok) throw new Error(await res.text());
   return res.json();
 }

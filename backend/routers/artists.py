@@ -2,10 +2,10 @@ import logging
 import os
 import secrets
 from datetime import datetime, timedelta
-from fastapi import APIRouter, Depends, HTTPException, UploadFile, File
+from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Request, Header
 from sqlmodel import Session, select, func
 from pydantic import BaseModel
-from typing import Optional
+from typing import Optional, Annotated
 from models import Kuenstler, KuenstlerCreate, KuenstlerPublic, KuenstlerSelf, KuenstlerBewerbungCreate, Bild, BildPublic, Genre, Abrechnungsempfaenger, KuenstlerNachricht, KuenstlerNachrichtGelesen
 from database import get_session
 from services import email_service
@@ -17,6 +17,35 @@ logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/kuenstler", tags=["Künstler"])
 
 UPLOAD_DIR = os.getenv("UPLOAD_DIR", "./uploads")
+
+
+async def _kuenstler_auth(
+    kuenstler_id: int,
+    request: Request,
+    x_kuenstler_token: Annotated[str | None, Header()] = None,
+    session: Session = Depends(get_session),
+) -> Kuenstler:
+    """Erlaubt Zugriff für: den Künstler selbst (per login_token) oder Admin/Orga (per JWT)."""
+    auth_header = request.headers.get("Authorization", "")
+    if auth_header.startswith("Bearer "):
+        from services.auth_service import verify_token as _jwt_verify
+        payload = _jwt_verify(auth_header[7:].strip())
+        if payload and payload.get("rolle") in ("admin", "orga"):
+            k = session.get(Kuenstler, kuenstler_id)
+            if not k:
+                raise HTTPException(404, "Künstler nicht gefunden")
+            return k
+
+    if not x_kuenstler_token:
+        raise HTTPException(401, "Anmeldung erforderlich")
+    k = session.get(Kuenstler, kuenstler_id)
+    if not k:
+        raise HTTPException(404, "Künstler nicht gefunden")
+    if k.login_token != x_kuenstler_token:
+        raise HTTPException(403, "Token ungültig")
+    if not k.login_token_expiry or k.login_token_expiry < datetime.utcnow():
+        raise HTTPException(401, "Token abgelaufen — bitte neuen Login-Link anfordern")
+    return k
 
 
 @router.get("/", response_model=list[KuenstlerPublic])
@@ -95,10 +124,7 @@ def verify_token(token: str, session: Session = Depends(get_session)):
 
 
 @router.get("/{kuenstler_id}/self", response_model=KuenstlerSelf)
-def kuenstler_self(kuenstler_id: int, session: Session = Depends(get_session)):
-    k = session.get(Kuenstler, kuenstler_id)
-    if not k:
-        raise HTTPException(404)
+def kuenstler_self(k: Annotated[Kuenstler, Depends(_kuenstler_auth)]):
     return k
 
 
@@ -135,13 +161,10 @@ def bewerben(data: KuenstlerBewerbungCreate, session: Session = Depends(get_sess
 
 @router.patch("/{kuenstler_id}/profil")
 def profil_aktualisieren(
-    kuenstler_id: int,
     daten: dict,
+    k: Annotated[Kuenstler, Depends(_kuenstler_auth)],
     session: Session = Depends(get_session),
 ):
-    k = session.get(Kuenstler, kuenstler_id)
-    if not k:
-        raise HTTPException(404)
     erlaubt = {"db_beruf", "db_leben", "db_kommentar", "db_ausstellungen", "db_adresse", "db_plz", "db_ort", "db_telefon", "db_email", "db_instagram", "db_facebook", "db_pinterest", "db_webseite"}
     for key, val in daten.items():
         if key in erlaubt:
@@ -152,10 +175,10 @@ def profil_aktualisieren(
 
 
 @router.patch("/{kuenstler_id}/dsgvo")
-def dsgvo_einwilligung(kuenstler_id: int, session: Session = Depends(get_session)):
-    k = session.get(Kuenstler, kuenstler_id)
-    if not k:
-        raise HTTPException(404)
+def dsgvo_einwilligung(
+    k: Annotated[Kuenstler, Depends(_kuenstler_auth)],
+    session: Session = Depends(get_session),
+):
     k.dsgvo_einwilligung = True
     k.dsgvo_zeitstempel = datetime.utcnow()
     session.add(k)
@@ -173,6 +196,7 @@ class BildEinreichungData(BaseModel):
     anmerkung_bild: Optional[str] = None
     abrechnungsempf: Optional[Abrechnungsempfaenger] = None
     galerist_id: Optional[int] = None
+    in_ausstellung: bool = True
 
 
 def _generiere_bild_nr(kuenstler: Kuenstler, session: Session) -> str:
@@ -190,7 +214,11 @@ def _generiere_bild_nr(kuenstler: Kuenstler, session: Session) -> str:
 
 
 @router.get("/{kuenstler_id}/bilder", response_model=list[BildPublic])
-def kuenstler_bilder(kuenstler_id: int, session: Session = Depends(get_session)):
+def kuenstler_bilder(
+    kuenstler_id: int,
+    k: Annotated[Kuenstler, Depends(_kuenstler_auth)],
+    session: Session = Depends(get_session),
+):
     bilder = session.exec(
         select(Bild).where(Bild.kuenstler_id == kuenstler_id).order_by(Bild.bild_nr)
     ).all()
@@ -198,14 +226,15 @@ def kuenstler_bilder(kuenstler_id: int, session: Session = Depends(get_session))
 
 
 @router.post("/{kuenstler_id}/bilder", response_model=BildPublic)
-def bild_einreichen(kuenstler_id: int, data: BildEinreichungData, session: Session = Depends(get_session)):
-    k = session.get(Kuenstler, kuenstler_id)
-    if not k:
-        raise HTTPException(404, "Künstler nicht gefunden")
+def bild_einreichen(
+    data: BildEinreichungData,
+    k: Annotated[Kuenstler, Depends(_kuenstler_auth)],
+    session: Session = Depends(get_session),
+):
     bild_nr = _generiere_bild_nr(k, session)
     b = Bild(
         bild_nr=bild_nr,
-        kuenstler_id=kuenstler_id,
+        kuenstler_id=k.id,
         bildtitel=data.bildtitel,
         bildtechnik=data.bildtechnik,
         genre=data.genre,
@@ -227,7 +256,9 @@ def bild_einreichen(kuenstler_id: int, data: BildEinreichungData, session: Sessi
 
 @router.post("/{kuenstler_id}/bilder/{bild_id}/foto")
 async def bild_foto_hochladen(
-    kuenstler_id: int, bild_id: int,
+    kuenstler_id: int,
+    bild_id: int,
+    k: Annotated[Kuenstler, Depends(_kuenstler_auth)],
     file: UploadFile = File(...),
     session: Session = Depends(get_session),
 ):
@@ -245,7 +276,12 @@ async def bild_foto_hochladen(
 
 
 @router.delete("/{kuenstler_id}/bilder/{bild_id}")
-def bild_zurueckziehen(kuenstler_id: int, bild_id: int, session: Session = Depends(get_session)):
+def bild_zurueckziehen(
+    kuenstler_id: int,
+    bild_id: int,
+    k: Annotated[Kuenstler, Depends(_kuenstler_auth)],
+    session: Session = Depends(get_session),
+):
     b = session.get(Bild, bild_id)
     if not b or b.kuenstler_id != kuenstler_id:
         raise HTTPException(404)
@@ -257,8 +293,11 @@ def bild_zurueckziehen(kuenstler_id: int, bild_id: int, session: Session = Depen
 
 
 @router.get("/{kuenstler_id}/nachrichten")
-def kuenstler_nachrichten(kuenstler_id: int, session: Session = Depends(get_session)):
-    session.get(Kuenstler, kuenstler_id) or (_ for _ in ()).throw(HTTPException(404))
+def kuenstler_nachrichten(
+    kuenstler_id: int,
+    k: Annotated[Kuenstler, Depends(_kuenstler_auth)],
+    session: Session = Depends(get_session),
+):
     nachrichten = session.exec(
         select(KuenstlerNachricht).order_by(KuenstlerNachricht.erstellt_am.desc())
     ).all()
@@ -274,7 +313,12 @@ def kuenstler_nachrichten(kuenstler_id: int, session: Session = Depends(get_sess
 
 
 @router.post("/{kuenstler_id}/nachrichten/{nachricht_id}/gelesen")
-def nachricht_gelesen(kuenstler_id: int, nachricht_id: int, session: Session = Depends(get_session)):
+def nachricht_gelesen(
+    kuenstler_id: int,
+    nachricht_id: int,
+    k: Annotated[Kuenstler, Depends(_kuenstler_auth)],
+    session: Session = Depends(get_session),
+):
     exists = session.exec(
         select(KuenstlerNachrichtGelesen).where(
             KuenstlerNachrichtGelesen.kuenstler_id == kuenstler_id,
@@ -290,12 +334,10 @@ def nachricht_gelesen(kuenstler_id: int, nachricht_id: int, session: Session = D
 @router.post("/{kuenstler_id}/portrait")
 async def portrait_hochladen(
     kuenstler_id: int,
+    k: Annotated[Kuenstler, Depends(_kuenstler_auth)],
     file: UploadFile = File(...),
     session: Session = Depends(get_session),
 ):
-    k = session.get(Kuenstler, kuenstler_id)
-    if not k:
-        raise HTTPException(404)
     data = await file.read()
     web_bytes, orig_bytes = compress_image(data, file.filename)
     web_url, _ = save_image(web_bytes, orig_bytes, f"portrait_{kuenstler_id}", UPLOAD_DIR)

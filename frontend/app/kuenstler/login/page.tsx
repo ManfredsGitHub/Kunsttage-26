@@ -2,6 +2,7 @@
 import { useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { verifyToken, loginLinkAnfordern } from "@/lib/api";
+import { setKuenstlerToken } from "@/lib/auth";
 import { Suspense } from "react";
 
 function LinkAnfordern() {
@@ -56,6 +57,7 @@ function LoginInner() {
       .then(({ kuenstler_id, name }) => {
         localStorage.setItem("kuenstler_id", String(kuenstler_id));
         localStorage.setItem("kuenstler_name", name);
+        setKuenstlerToken(token);
         setStatus("ok");
         setTimeout(() => router.push("/kuenstler/portal"), 1500);
       })
