@@ -20,6 +20,7 @@ import csv
 import os
 import sys
 from pathlib import Path
+from typing import Optional
 
 # Damit Imports aus dem backend-Verzeichnis funktionieren
 sys.path.insert(0, str(Path(__file__).parent))
@@ -34,6 +35,9 @@ load_dotenv()
 DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///./kunsttage.db")
 # Bilder werden vom Backend (8000) ausgeliefert — unabhängig von BASE_URL (Frontend)
 IMAGE_BASE_URL = os.getenv("IMAGE_BASE_URL", "http://localhost:8000")
+
+STANDARD_AUSSCHNITTE = [7, 14, 23]  # 5×5-Raster: Hook, zweiter Blick, Abschluss-Detail
+REELS_DIR = "uploads/reels"
 
 EVENT_ZEILE1 = "14. Kunsttage auf der Ludwigshöhe"
 EVENT_ZEILE2 = "17. & 18. Oktober 2026"
@@ -131,6 +135,32 @@ Sprache: Deutsch."""
         return "", ""
 
 
+def ausschnitt_erstellen(img_pfad: str, bild_nr: str, teil: int) -> Optional[str]:
+    """Schneidet Teil N (1–25) aus einem 5×5-Raster und speichert als JPG."""
+    try:
+        from PIL import Image
+        img_pfad_full = "." + img_pfad if img_pfad.startswith("/") else img_pfad
+        if not os.path.exists(img_pfad_full):
+            return None
+        os.makedirs(REELS_DIR, exist_ok=True)
+        with Image.open(img_pfad_full) as img:
+            w, h = img.size
+            col = (teil - 1) % 5
+            row = (teil - 1) // 5
+            x1 = int(col * w / 5)
+            y1 = int(row * h / 5)
+            x2 = int((col + 1) * w / 5)
+            y2 = int((row + 1) * h / 5)
+            crop = img.crop((x1, y1, x2, y2))
+            dateiname = f"{bild_nr}_t{teil}.jpg"
+            ausgabe = os.path.join(REELS_DIR, dateiname)
+            crop.convert("RGB").save(ausgabe, "JPEG", quality=90)
+            return f"/{REELS_DIR}/{dateiname}"
+    except Exception as e:
+        print(f"  ⚠️  Ausschnitt {teil} fehlgeschlagen: {e}")
+        return None
+
+
 def erster_satz(text: str) -> str:
     for sep in (".", "!", "?"):
         idx = text.find(sep)
@@ -199,6 +229,16 @@ def export(mit_ki: bool, limit: int | None, output: str) -> None:
         foto2 = foto_url(zusatzfotos[0].url) if zusatzfotos else foto1
         kuenstler_foto = foto_url(kuenstler.portrait_foto) if kuenstler and kuenstler.portrait_foto else foto1
 
+        # Bildausschnitte (5×5-Raster, Standard: 7, 14, 23)
+        ausschnitte_nrn = STANDARD_AUSSCHNITTE
+        ausschnitt_urls = []
+        if bild.bild_url_web:
+            for teil in ausschnitte_nrn:
+                pfad = ausschnitt_erstellen(bild.bild_url_web, bild.bild_nr, teil)
+                ausschnitt_urls.append(foto_url(pfad) if pfad else foto1)
+        while len(ausschnitt_urls) < 3:
+            ausschnitt_urls.append(foto1)
+
         genre_str = bild.genre.value if bild.genre else ""
 
         # KI-Felder: bevorzugt aus DB, sonst live generieren (--mit-ki), sonst Fallback
@@ -225,22 +265,25 @@ def export(mit_ki: bool, limit: int | None, output: str) -> None:
         ki_satz = erster_satz(ki_text) if ki_text else f"{bild.bildtechnik} · {genre_str}"
 
         rows.append({
-            "Bild_Nr":          format_bild_nr(bild.bild_nr),
-            "Werktitel":        bild.bildtitel,
-            "Hook":             hook,
-            "Kuenstler_Name":   kuenstler_zeile,
-            "Technik":          bild.bildtechnik,
-            "Genre":            genre_str,
-            "KI_Satz":          ki_satz,
-            "KI_Beschreibung":  ki_text,
-            "Hashtags":         hashtags_fuer_werk(bild, kuenstler),
-            "Foto_URL_1":       foto1,
-            "Foto_URL_2":       foto2,
-            "Kuenstler_Foto_URL": kuenstler_foto,
-            "Event_Zeile1":     EVENT_ZEILE1,
-            "Event_Zeile2":     EVENT_ZEILE2,
-            "Event_Zeile3":     EVENT_ZEILE3,
-            "CTA":              CTA,
+            "Bild_Nr":            format_bild_nr(bild.bild_nr),
+            "Werktitel":          bild.bildtitel,
+            "Hook":               hook,
+            "Kuenstler_Name":     kuenstler_zeile,
+            "Technik":            bild.bildtechnik,
+            "Genre":              genre_str,
+            "KI_Satz":            ki_satz,
+            "KI_Beschreibung":    ki_text,
+            "Hashtags":           hashtags_fuer_werk(bild, kuenstler),
+            "Ausschnitt_URL_1":   ausschnitt_urls[0],   # Hook-Szene  (00–03s)
+            "Ausschnitt_URL_2":   ausschnitt_urls[1],   # 2. Detail   (03–07s)
+            "Ausschnitt_URL_3":   ausschnitt_urls[2],   # 3. Detail   (vor Reveal)
+            "Foto_URL_1":         foto1,                # Gesamtbild  (Reveal + Beschreibung)
+            "Foto_URL_2":         foto2,                # Zusatzfoto  (Künstler-Szene Hintergrund)
+            "Kuenstler_Foto_URL": kuenstler_foto,       # Portrait    (Künstler-Szene)
+            "Event_Zeile1":       EVENT_ZEILE1,
+            "Event_Zeile2":       EVENT_ZEILE2,
+            "Event_Zeile3":       EVENT_ZEILE3,
+            "CTA":                CTA,
         })
 
     with open(output, "w", newline="", encoding="utf-8-sig") as f:
