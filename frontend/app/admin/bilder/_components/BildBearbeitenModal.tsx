@@ -4,6 +4,8 @@ import { getAlleKuenstler, fotoHochladen, bildAktualisieren, bildLoeschen, aiBes
 import { Bild, Kuenstler, BildFoto, Verfuegbarkeit, VERFUEGBARKEIT } from "@/lib/types";
 import { formatBildNr } from "@/lib/utils";
 
+const UPLOAD_BASE = (process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000").replace(/\/api$/, "");
+
 const GENRES = ["Abstrakt","Akt","Landschaft","Menschen","Pfalz","Portrait","Städte","Stilleben","Sonstiges"];
 
 export function BildBearbeitenModal({ bild, onClose, onSaved, onDeleted }: { bild: Bild; onClose: () => void; onSaved: (b: Bild) => void; onDeleted: (id: number) => void }) {
@@ -148,7 +150,7 @@ export function BildBearbeitenModal({ bild, onClose, onSaved, onDeleted }: { bil
           {lightboxUrl && (
             <div className="fixed inset-0 z-[60] bg-black/90 flex items-center justify-center"
               onClick={() => setLightboxUrl(null)}>
-              <img src={`http://localhost:8000${lightboxUrl}`} alt=""
+              <img src={`${UPLOAD_BASE}${lightboxUrl}`} alt=""
                 className="max-w-[90vw] max-h-[90vh] object-contain rounded shadow-2xl" />
               <button onClick={() => setLightboxUrl(null)}
                 className="absolute top-4 right-4 text-white text-3xl leading-none hover:text-gray-300">×</button>
@@ -160,7 +162,7 @@ export function BildBearbeitenModal({ bild, onClose, onSaved, onDeleted }: { bil
             <div className="flex flex-col items-center gap-1">
               <div className="relative w-28 h-28 rounded-lg overflow-hidden border border-gray-200 bg-gray-50 flex items-center justify-center">
                 {fotoUrl ? (
-                  <img src={`http://localhost:8000${fotoUrl}`} alt={bild.bildtitel}
+                  <img src={`${UPLOAD_BASE}${fotoUrl}`} alt={bild.bildtitel}
                     className="w-full h-full object-cover cursor-zoom-in"
                     onClick={() => setLightboxUrl(fotoUrl)} />
                 ) : (
@@ -179,7 +181,7 @@ export function BildBearbeitenModal({ bild, onClose, onSaved, onDeleted }: { bil
             {zusatzFotos.map((f, i) => (
               <div key={f.id} className="flex flex-col items-center gap-1">
                 <div className="relative w-28 h-28 rounded-lg overflow-hidden border border-gray-200">
-                  <img src={`http://localhost:8000${f.url}`} alt=""
+                  <img src={`${UPLOAD_BASE}${f.url}`} alt=""
                     className="w-full h-full object-cover cursor-zoom-in"
                     onClick={() => setLightboxUrl(f.url)} />
                   <span className="absolute bottom-1 left-1 text-xs bg-black/50 text-white px-1 rounded">{i + 2}</span>

@@ -6,6 +6,8 @@ import { formatBildNr } from "@/lib/utils";
 import { NeuModal } from "./_components/NeuModal";
 import { BildBearbeitenModal } from "./_components/BildBearbeitenModal";
 
+const UPLOAD_BASE = (process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000").replace(/\/api$/, "");
+
 type Filter = "alle" | "offen" | "mit_foto" | "ohne_foto" | "online" | "verfuegbar" | "nicht_verfuegbar" | "nachfragen" | "reserviert" | "verkauft";
 type SortKey = "kuenstler" | "titel" | "bild_nr" | "genre" | "einlieferungspreis" | "verkaufspreis";
 type SortDir = "asc" | "desc";
@@ -369,7 +371,7 @@ export default function AdminBilderPage() {
                 <td className="px-2 py-1.5 text-center">
                   {b.bild_url_web ? (
                     <img
-                      src={`http://localhost:8000${b.bild_url_web}`}
+                      src={`${UPLOAD_BASE}${b.bild_url_web}`}
                       alt={b.bildtitel}
                       className="w-9 h-9 object-cover rounded mx-auto"
                     />
