@@ -4,13 +4,12 @@ import { Kuenstler } from "@/lib/types";
 import { UPLOAD_BASE } from "@/lib/api";
 
 const API = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
-const SITE = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
 
 export const metadata: Metadata = {
   title: "Künstlerinnen & Künstler",
   description:
     "Alle teilnehmenden Künstlerinnen und Künstler der Kunsttage auf der Ludwigshöhe 2026 – mit Vita, ausgestellten Werken und Preisen.",
-  alternates: { canonical: `${SITE}/kuenstler` },
+  alternates: { canonical: "/kuenstler" },
 };
 
 export default async function KuenstlerListePage() {
