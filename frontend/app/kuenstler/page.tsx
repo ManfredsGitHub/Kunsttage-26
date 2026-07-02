@@ -16,7 +16,7 @@ export const metadata: Metadata = {
 export default async function KuenstlerListePage() {
   let kuenstler: Kuenstler[] = [];
   try {
-    const res = await fetch(`${API}/kuenstler`, { next: { revalidate: 300 } });
+    const res = await fetch(`${API}/kuenstler/`, { next: { revalidate: 300 } });
     if (res.ok) {
       const data: Kuenstler[] = await res.json();
       kuenstler = data.sort((a, b) => a.db_name.localeCompare(b.db_name, "de"));

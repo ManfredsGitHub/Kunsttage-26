@@ -7,7 +7,7 @@ const SITE = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
 
 export async function generateStaticParams() {
   try {
-    const res = await fetch(`${API}/bilder?limit=1000`);
+    const res = await fetch(`${API}/bilder/?limit=1000`);
     if (!res.ok) return [];
     const bilder: { id: number }[] = await res.json();
     return bilder.map((b) => ({ id: String(b.id) }));

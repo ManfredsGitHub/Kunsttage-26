@@ -14,7 +14,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   let bildUrls: MetadataRoute.Sitemap = [];
   try {
-    const res = await fetch(`${API}/bilder?limit=1000`, { next: { revalidate: 3600 } });
+    const res = await fetch(`${API}/bilder/?limit=1000`, { next: { revalidate: 3600 } });
     if (res.ok) {
       const bilder: { id: number }[] = await res.json();
       bildUrls = bilder.map((b) => ({
