@@ -46,13 +46,18 @@ export function getNutzerId(): number | null {
 
 async function _setHttpOnlyCookie(token: string, stunden: number): Promise<void> {
   try {
-    await fetch("/api/auth/set-cookie", {
+    const res = await fetch("/api/auth/set-cookie", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ token, stunden }),
     });
-  } catch {
-    // httpOnly-Cookie ist Security-Bonus, kein showstopper
+    if (!res.ok && process.env.NODE_ENV === "development") {
+      console.warn("[auth] set-cookie fehlgeschlagen:", res.status, res.url);
+    }
+  } catch (e) {
+    if (process.env.NODE_ENV === "development") {
+      console.warn("[auth] set-cookie Netzwerkfehler:", e);
+    }
   }
 }
 
