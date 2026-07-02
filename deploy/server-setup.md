@@ -158,11 +158,13 @@ Versionen prüfen:
 
 Alle Werte eintragen:
 
+    ENVIRONMENT=production
+
     JWT_SECRET=<64-stelliger-zufallsstring>
     ADMIN_PASSWORT=<sicheres-admin-passwort>
     ORGA_PASSWORT=<passwort-fuer-orga-team>
 
-    DATABASE_URL=sqlite:////var/kunsttage/kunsttage.db
+    DATABASE_URL=sqlite:////var/kunsttage/app/backend/data/kunsttage.db
     UPLOAD_DIR=/var/kunsttage/uploads
     BASE_URL=https://kunsttage-ludwigshoehe.de
     CORS_ORIGINS=https://kunsttage-ludwigshoehe.de
@@ -183,11 +185,14 @@ JWT_SECRET erzeugen (auf dem Server ausführen):
 
     cd /var/kunsttage/app/frontend
     npm install
-    nano .env.local
+    nano .env.production
 
-Inhalt:
+Inhalt (WICHTIG: Datei muss `.env.production` heißen, nicht `.env.local` —
+`deploy/deploy.sh` prüft bei jedem späteren Deployment genau diesen Namen
+und bricht sonst mit "FEHLER: .env.production fehlt!" ab):
 
     NEXT_PUBLIC_API_URL=https://kunsttage-ludwigshoehe.de/api
+    NEXT_PUBLIC_SITE_URL=https://kunsttage-ludwigshoehe.de
 
     npm run build
 

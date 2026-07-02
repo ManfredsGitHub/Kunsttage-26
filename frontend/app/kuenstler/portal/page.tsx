@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { getKuenstlerById, getKuenstler, updateProfil, dsgvoEinwilligung, getKuenstlerBilder, kuenstlerBildEinreichen, kuenstlerBildLoeschen, kuenstlerBildFotoHochladen, getKuenstlerNachrichten, nachrichtAlsGelesen } from "@/lib/api";
+import { getKuenstlerById, getKuenstler, updateProfil, dsgvoEinwilligung, getKuenstlerBilder, kuenstlerBildEinreichen, kuenstlerBildLoeschen, kuenstlerBildFotoHochladen, getKuenstlerNachrichten, nachrichtAlsGelesen, UPLOAD_BASE } from "@/lib/api";
 import { Kuenstler, Bild, Genre } from "@/lib/types";
 import { formatBildNr } from "@/lib/utils";
 
@@ -59,7 +59,7 @@ function VitaVorschau({ kuenstler, form }: { kuenstler: Kuenstler; form: FormDat
         </div>
         {kuenstler.portrait_foto && (
           <img
-            src={`${API}${kuenstler.portrait_foto}`}
+            src={`${UPLOAD_BASE}${kuenstler.portrait_foto}`}
             alt="Portrait"
             style={{ width: "26mm", height: "26mm", borderRadius: "50%", objectFit: "cover", flexShrink: 0 }}
           />
@@ -379,7 +379,7 @@ export default function KuenstlerPortalPage() {
                 <h2 className="font-semibold text-gray-700 border-b pb-2 mb-4">Portrait-Foto</h2>
                 <div className="flex items-center gap-4">
                   {kuenstler.portrait_foto ? (
-                    <img src={`${API}${kuenstler.portrait_foto}`} alt="Portrait"
+                    <img src={`${UPLOAD_BASE}${kuenstler.portrait_foto}`} alt="Portrait"
                       className="w-20 h-20 rounded-full object-cover shadow" />
                   ) : (
                     <div className="w-20 h-20 rounded-full bg-lions-blue/10 flex items-center justify-center text-lions-blue font-bold text-2xl">
@@ -655,7 +655,7 @@ export default function KuenstlerPortalPage() {
                 {/* Thumbnail / Foto-Upload */}
                 <label className="w-20 h-20 flex-shrink-0 rounded overflow-hidden bg-gray-100 cursor-pointer relative group">
                   {b.bild_url_web
-                    ? <img src={`${API}${b.bild_url_web}`} alt={b.bildtitel} className="w-full h-full object-cover" />
+                    ? <img src={`${UPLOAD_BASE}${b.bild_url_web}`} alt={b.bildtitel} className="w-full h-full object-cover" />
                     : <div className="w-full h-full flex flex-col items-center justify-center text-gray-300 text-xs text-center p-1">
                         <span className="text-2xl">+</span>Foto
                       </div>

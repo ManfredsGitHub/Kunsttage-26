@@ -3,6 +3,13 @@ import { authHeaders, kuenstlerAuthHeaders } from "./auth";
 
 const BASE = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
 
+// Basis-URL für hochgeladene Dateien (Bilder, Portraits). Bewusst OHNE
+// "/api"-Suffix: Bild-Requests über "${BASE}/uploads/..." liefen sonst
+// durch den ratenlimitierten nginx /api/-Proxy-Block (10 req/s) statt
+// über den eigenen, großzügigeren nginx /uploads/-Block. Bei Galerien
+// mit vielen Thumbnails führte das zu 429-Fehlern auf Bildern.
+export const UPLOAD_BASE = BASE.replace(/\/api$/, "");
+
 async function req<T>(path: string, init?: RequestInit): Promise<T> {
   const res = await fetch(`${BASE}${path}`, {
     ...init,

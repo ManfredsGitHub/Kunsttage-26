@@ -1,11 +1,9 @@
 "use client";
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
-import { getKuenstlerById, getBilder } from "@/lib/api";
+import { getKuenstlerById, getBilder, UPLOAD_BASE } from "@/lib/api";
 import { Kuenstler, Bild } from "@/lib/types";
 import BildCard from "@/components/BildCard";
-
-const API = process.env.NEXT_PUBLIC_API_URL;
 
 export default function KuenstlerDetailPage() {
   const { id } = useParams<{ id: string }>();
@@ -34,7 +32,7 @@ export default function KuenstlerDetailPage() {
       <div className="flex gap-6 items-start">
         {kuenstler.portrait_foto ? (
           <img
-            src={`${API}${kuenstler.portrait_foto}`}
+            src={`${UPLOAD_BASE}${kuenstler.portrait_foto}`}
             alt={`${kuenstler.db_vorname} ${kuenstler.db_name}`}
             className="w-28 h-28 rounded-full object-cover flex-shrink-0 shadow"
           />

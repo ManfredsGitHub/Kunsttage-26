@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
-import { getAlleKuenstler, kuenstlerAktualisieren, kuenstlerEinladen, kuenstlerLoeschen } from "@/lib/api";
+import { getAlleKuenstler, kuenstlerAktualisieren, kuenstlerEinladen, kuenstlerLoeschen, UPLOAD_BASE } from "@/lib/api";
 import { Kuenstler } from "@/lib/types";
 import { formatBildNr } from "@/lib/utils";
 
@@ -113,7 +113,7 @@ export function EditModal({ k, onClose, onSaved, onDeleted }: { k: Kuenstler; on
     { id: "orga",    label: "Organisation" },
   ];
 
-  const avatarSrc = portraitPreview ?? (k.portrait_foto ? `${API}${k.portrait_foto}` : null);
+  const avatarSrc = portraitPreview ?? (k.portrait_foto ? `${UPLOAD_BASE}${k.portrait_foto}` : null);
 
   return (
     <div className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center p-4" onClick={onClose}>

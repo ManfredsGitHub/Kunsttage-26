@@ -4,6 +4,15 @@ import hashlib
 
 DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///./kunsttage.db")
 
+# SQLite legt fehlende Elternverzeichnisse nicht selbst an — ohne dies
+# crasht der Start, sobald DATABASE_URL auf einen noch nicht existierenden
+# Unterordner zeigt (z.B. .../backend/data/kunsttage.db).
+if DATABASE_URL.startswith("sqlite:///"):
+    _db_path = DATABASE_URL.removeprefix("sqlite:///")
+    _db_dir = os.path.dirname(_db_path)
+    if _db_dir:
+        os.makedirs(_db_dir, exist_ok=True)
+
 _PLAETZE_2025 = [
     # Raum 43
     (1,  "Raum 43",   1, "2,0 m"),

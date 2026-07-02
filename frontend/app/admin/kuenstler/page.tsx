@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useState, useMemo, useRef } from "react";
-import { getAlleKuenstler, getAlleBilder, kuenstlerAktualisieren } from "@/lib/api";
+import { getAlleKuenstler, getAlleBilder, kuenstlerAktualisieren, UPLOAD_BASE } from "@/lib/api";
 import { authHeaders } from "@/lib/auth";
 import { Kuenstler, Bild } from "@/lib/types";
 import { formatBildNr } from "@/lib/utils";
@@ -225,7 +225,7 @@ export default function AdminKuenstlerPage() {
               </div>
 
               {b.bild_url_web
-                ? <img src={`${API}${b.bild_url_web}`} alt={b.bildtitel}
+                ? <img src={`${UPLOAD_BASE}${b.bild_url_web}`} alt={b.bildtitel}
                        className="w-full max-h-[65vh] object-contain bg-gray-50" />
                 : <div className="h-64 flex items-center justify-center text-gray-300 text-5xl bg-gray-50">🖼</div>
               }
@@ -361,7 +361,7 @@ export default function AdminKuenstlerPage() {
                   title={b.bildtitel}
                 >
                   {b.bild_url_web
-                    ? <img src={`${API}${b.bild_url_web}`} alt={b.bildtitel}
+                    ? <img src={`${UPLOAD_BASE}${b.bild_url_web}`} alt={b.bildtitel}
                         className="w-full h-full object-cover" />
                     : <div className="w-full h-full flex items-center justify-center text-gray-300 text-lg">🖼</div>
                   }

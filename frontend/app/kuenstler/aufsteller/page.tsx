@@ -1,11 +1,9 @@
 "use client";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { getKuenstlerById, getKuenstlerBilder } from "@/lib/api";
+import { getKuenstlerById, getKuenstlerBilder, UPLOAD_BASE } from "@/lib/api";
 import { Bild, Kuenstler } from "@/lib/types";
 import { formatBildNr } from "@/lib/utils";
-
-const API = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
 
 export default function KuenstlerAufstellerPage() {
   const router = useRouter();
@@ -224,7 +222,7 @@ function Aufsteller({ bild: b, abmessungen }: { bild: Bild; abmessungen: string 
           }}>
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
-              src={`${API}${b.bild_url_web}`}
+              src={`${UPLOAD_BASE}${b.bild_url_web}`}
               alt={b.bildtitel}
               style={{ maxWidth: "100%", maxHeight: "100%", objectFit: "contain", display: "block" }}
             />

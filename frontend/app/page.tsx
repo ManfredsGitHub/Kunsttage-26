@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useState, useMemo } from "react";
-import { getBilder } from "@/lib/api";
+import { getBilder, UPLOAD_BASE } from "@/lib/api";
 import { Bild, Kuenstler } from "@/lib/types";
 import BildCard from "@/components/BildCard";
 import FilterBar from "@/components/FilterBar";
@@ -214,7 +214,7 @@ export default function GaleriePage() {
               ? spotlightKuenstler[chunkIdx % spotlightKuenstler.length]
               : null;
             const imgSrc = sp?.ersteBild.bild_url_web
-              ? `${process.env.NEXT_PUBLIC_API_URL}${sp.ersteBild.bild_url_web}`
+              ? `${UPLOAD_BASE}${sp.ersteBild.bild_url_web}`
               : "/placeholder.jpg";
 
             return (

@@ -11,6 +11,10 @@ backend/.env.*
 frontend/.env.local
 frontend/.env*.local
 
+# .rtf-Dateien sehen wie Dokumente aus, enthielten in diesem Projekt aber
+# schon einmal Zugangsdaten (siehe CLAUDE.md Coding-Regeln)
+*.rtf
+
 # ── Datenbank & Uploads ───────────────────────────────────────────────────────
 *.db
 *.sqlite

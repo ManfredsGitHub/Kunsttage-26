@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { getBild, reservieren, getBildFotosPublic, kaufanfrageStellen } from "@/lib/api";
+import { getBild, reservieren, getBildFotosPublic, kaufanfrageStellen, UPLOAD_BASE } from "@/lib/api";
 import { Bild, BildFoto, VERFUEGBARKEIT } from "@/lib/types";
 import { formatBildNr, bildAlt } from "@/lib/utils";
 import MerklistenButton from "@/components/MerklistenButton";
@@ -34,7 +34,7 @@ function WandVorschau({ bild }: { bild: Bild }) {
   const img_y = hang_y - img_h / 2;
   const img_x = (door_x - img_w) / 2;
 
-  const imgSrc = bild.bild_url_web ? `${API}${bild.bild_url_web}` : null;
+  const imgSrc = bild.bild_url_web ? `${UPLOAD_BASE}${bild.bild_url_web}` : null;
 
   return (
     <div className="mt-4">
@@ -173,7 +173,7 @@ export default function BildDetailClient({ id, initialBild }: { id: string; init
   if (fehler) return <p className="text-red-600">{fehler}</p>;
   if (!bild) return <p className="text-gray-400 animate-pulse">Laden…</p>;
 
-  const imgSrc = aktivFoto ? `${API}${aktivFoto}` : "/placeholder.jpg";
+  const imgSrc = aktivFoto ? `${UPLOAD_BASE}${aktivFoto}` : "/placeholder.jpg";
   const alleUrls = [bild.bild_url_web, ...zusatzFotos.map(f => f.url)].filter(Boolean) as string[];
 
   return (
@@ -218,7 +218,7 @@ export default function BildDetailClient({ id, initialBild }: { id: string; init
                     aktivFoto === url ? "border-lions-blue" : "border-transparent hover:border-gray-300"
                   }`}
                 >
-                  <img src={`${API}${url}`} alt="" className="w-full h-full object-cover" />
+                  <img src={`${UPLOAD_BASE}${url}`} alt="" className="w-full h-full object-cover" />
                 </button>
               ))}
             </div>
@@ -239,7 +239,7 @@ export default function BildDetailClient({ id, initialBild }: { id: string; init
               <div className="mt-3 flex items-start gap-3">
                 {bild.kuenstler.portrait_foto ? (
                   <img
-                    src={`${API}${bild.kuenstler.portrait_foto}`}
+                    src={`${UPLOAD_BASE}${bild.kuenstler.portrait_foto}`}
                     alt={`Portrait ${bild.kuenstler.db_vorname ?? ""} ${bild.kuenstler.db_name ?? ""}`.trim()}
                     className="w-12 h-12 rounded-full object-cover flex-shrink-0 mt-0.5 shadow"
                   />

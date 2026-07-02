@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import { Kuenstler } from "@/lib/types";
 import { authHeaders } from "@/lib/auth";
+import { UPLOAD_BASE } from "@/lib/api";
 
 const API = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
 
@@ -42,7 +43,7 @@ export default function DruckenPage() {
   if (!kuenstler) return <p style={{ padding: 32, color: "#888" }}>Laden…</p>;
 
   const name = [kuenstler.db_vorname, kuenstler.db_name].filter(Boolean).join(" ");
-  const portrait = kuenstler.portrait_foto ? `${API}${kuenstler.portrait_foto}` : null;
+  const portrait = kuenstler.portrait_foto ? `${UPLOAD_BASE}${kuenstler.portrait_foto}` : null;
 
   const adresse = [
     kuenstler.db_adresse,

@@ -3,6 +3,7 @@ import Link from "next/link";
 import { Bild } from "@/lib/types";
 import MerklistenButton from "./MerklistenButton";
 import { bildAlt } from "@/lib/utils";
+import { UPLOAD_BASE } from "@/lib/api";
 
 const statusColors: Record<string, string> = {
   "Verfügbar": "bg-green-100 text-green-800",
@@ -12,7 +13,7 @@ const statusColors: Record<string, string> = {
 
 export default function BildCard({ bild }: { bild: Bild }) {
   const imgSrc = bild.bild_url_web
-    ? `${process.env.NEXT_PUBLIC_API_URL}${bild.bild_url_web}`
+    ? `${UPLOAD_BASE}${bild.bild_url_web}`
     : "/placeholder.jpg";
 
   return (

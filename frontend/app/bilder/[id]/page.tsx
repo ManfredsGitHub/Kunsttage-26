@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import BildDetailClient from "./BildDetailClient";
+import { UPLOAD_BASE } from "@/lib/api";
 
 const API = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
 const SITE = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
@@ -44,7 +45,7 @@ export async function generateMetadata({ params }: { params: { id: string } }): 
     .filter(Boolean)
     .join(" · ");
 
-  const ogImage = bild.bild_url_web ? `${API}${bild.bild_url_web}` : undefined;
+  const ogImage = bild.bild_url_web ? `${UPLOAD_BASE}${bild.bild_url_web}` : undefined;
 
   return {
     title,
@@ -88,7 +89,7 @@ export default async function BildDetailPage({ params }: { params: { id: string 
               name: `${bild.kuenstler.db_vorname} ${bild.kuenstler.db_name}`.trim(),
             }
           : undefined,
-        image: bild.bild_url_web ? `${API}${bild.bild_url_web}` : undefined,
+        image: bild.bild_url_web ? `${UPLOAD_BASE}${bild.bild_url_web}` : undefined,
         url: `${SITE}/bilder/${params.id}`,
       }
     : null;

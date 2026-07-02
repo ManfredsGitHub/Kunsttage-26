@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
 import { Bild, VERFUEGBARKEIT } from "@/lib/types";
-import { merkliste_admin_zusenden, merklisten_nachfassen } from "@/lib/api";
+import { merkliste_admin_zusenden, merklisten_nachfassen, UPLOAD_BASE } from "@/lib/api";
 import { authHeaders } from "@/lib/auth";
 
 const API = process.env.NEXT_PUBLIC_API_URL;
@@ -142,7 +142,7 @@ export default function AdminMerklistenPage() {
             {top.map(({ bild, count }) => (
               <div key={bild.id} className="flex items-center gap-3">
                 {bild.bild_url_web && (
-                  <img src={`${API}${bild.bild_url_web}`} alt=""
+                  <img src={`${UPLOAD_BASE}${bild.bild_url_web}`} alt=""
                     className="w-10 h-10 object-cover rounded flex-shrink-0" />
                 )}
                 <div className="flex-1 min-w-0">
@@ -237,7 +237,7 @@ export default function AdminMerklistenPage() {
                           {b.bilder.map(bild => (
                             <div key={bild.id} className="flex items-center gap-3">
                               {bild.bild_url_web ? (
-                                <img src={`${API}${bild.bild_url_web}`} alt=""
+                                <img src={`${UPLOAD_BASE}${bild.bild_url_web}`} alt=""
                                   className="w-10 h-10 object-cover rounded flex-shrink-0" />
                               ) : (
                                 <div className="w-10 h-10 bg-gray-200 rounded flex-shrink-0" />

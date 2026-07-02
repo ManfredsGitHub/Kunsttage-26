@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { Kuenstler } from "@/lib/types";
+import { UPLOAD_BASE } from "@/lib/api";
 
 const API = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
 const SITE = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
@@ -43,7 +44,7 @@ export default async function KuenstlerListePage() {
               <div className="bg-white rounded-lg shadow hover:shadow-md transition-shadow p-5 flex gap-4 items-start">
                 {k.portrait_foto ? (
                   <img
-                    src={`${API}${k.portrait_foto}`}
+                    src={`${UPLOAD_BASE}${k.portrait_foto}`}
                     alt={`Portrait ${k.db_vorname ?? ""} ${k.db_name}`.trim()}
                     className="w-16 h-16 rounded-full object-cover flex-shrink-0"
                   />
