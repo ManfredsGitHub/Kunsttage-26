@@ -3,22 +3,14 @@ from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 import os
 
-SMTP_HOST = os.getenv("SMTP_HOST", "smtp.ionos.de")
-SMTP_PORT = int(os.getenv("SMTP_PORT", "465"))
+SMTP_HOST = os.getenv("SMTP_HOST", "smtp.gmail.com")
+SMTP_PORT = int(os.getenv("SMTP_PORT", "587"))
 SMTP_USER = os.getenv("SMTP_USER", "")
 SMTP_PASS = os.getenv("SMTP_PASS", "")
 _ADMIN_EMAIL_RAW = os.getenv("ADMIN_EMAIL", "")
 ADMIN_EMAILS: list[str] = [e.strip() for e in _ADMIN_EMAIL_RAW.split(",") if e.strip()]
 ADMIN_EMAIL = ADMIN_EMAILS[0] if ADMIN_EMAILS else ""
 BASE_URL = os.getenv("BASE_URL", "http://localhost:3000")
-
-def _smtp_connection():
-    # Port 465 → SSL direkt; Port 587 → STARTTLS
-    if SMTP_PORT == 465:
-        return smtplib.SMTP_SSL(SMTP_HOST, SMTP_PORT)
-    s = smtplib.SMTP(SMTP_HOST, SMTP_PORT)
-    s.starttls()
-    return s
 
 
 def _send(to: str | list[str], subject: str, html: str):
@@ -30,7 +22,8 @@ def _send(to: str | list[str], subject: str, html: str):
     msg["From"] = SMTP_USER
     msg["To"] = ", ".join(recipients)
     msg.attach(MIMEText(html, "html"))
-    with _smtp_connection() as s:
+    with smtplib.SMTP(SMTP_HOST, SMTP_PORT) as s:
+        s.starttls()
         s.login(SMTP_USER, SMTP_PASS)
         s.sendmail(SMTP_USER, recipients, msg.as_string())
 
@@ -226,7 +219,8 @@ def send_nachfass(betreff: str, text: str, empfaenger: list[tuple[str, str | Non
     """Sendet individuelle E-Mails mit personalisierten Abmelde-Links.
     empfaenger: Liste von (email, token_oder_None) Tupeln.
     """
-    with _smtp_connection() as s:
+    with smtplib.SMTP(SMTP_HOST, SMTP_PORT) as s:
+        s.starttls()
         s.login(SMTP_USER, SMTP_PASS)
         for email, token in empfaenger:
             msg = MIMEMultipart("alternative")
