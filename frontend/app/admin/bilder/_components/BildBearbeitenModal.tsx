@@ -22,6 +22,7 @@ export function BildBearbeitenModal({ bild, onClose, onSaved, onDeleted }: { bil
     einlieferungspreis: String(bild.einlieferungspreis ?? ""),
     verkaufspreis: String(bild.verkaufspreis ?? ""),
     anmerkung_bild: bild.anmerkung_bild ?? "",
+    ki_hook: bild.ki_hook ?? "",
     foto_nr: (bild as any).foto_nr ?? "",
     in_ausstellung: bild.in_ausstellung !== false,
     freigegeben: bild.freigegeben ?? false,
@@ -39,7 +40,6 @@ export function BildBearbeitenModal({ bild, onClose, onSaved, onDeleted }: { bil
   const [fotoUrl, setFotoUrl] = useState(bild.bild_url_web ?? "");
   const [fotoLaedt, setFotoLaedt] = useState(false);
   const [aiLaedt, setAiLaedt] = useState(false);
-  const [kiHook, setKiHook] = useState(bild.ki_hook ?? "");
   const [zusatzFotos, setZusatzFotos] = useState<BildFoto[]>([]);
   const [zusatzLaedt, setZusatzLaedt] = useState(false);
   const [lightboxUrl, setLightboxUrl] = useState<string | null>(null);
@@ -87,7 +87,8 @@ export function BildBearbeitenModal({ bild, onClose, onSaved, onDeleted }: { bil
         ...(form.gewicht_kg ? { gewicht_kg: Number(form.gewicht_kg) } : {}),
         ...(form.einlieferungspreis ? { einlieferungspreis: Number(form.einlieferungspreis) } : {}),
         ...(form.verkaufspreis ? { verkaufspreis: Number(form.verkaufspreis) } : {}),
-        anmerkung_bild: form.anmerkung_bild || undefined,
+        anmerkung_bild: form.anmerkung_bild,
+        ki_hook: form.ki_hook,
         foto_nr: form.foto_nr || undefined,
         in_ausstellung: form.in_ausstellung,
         freigegeben: form.freigegeben,
@@ -227,8 +228,11 @@ export function BildBearbeitenModal({ bild, onClose, onSaved, onDeleted }: { bil
                     setAiLaedt(true);
                     try {
                       const { hook, beschreibung } = await aiBeschreibungGenerieren(bild.id);
-                      setKiHook(hook);
-                      setForm(f => ({ ...f, anmerkung_bild: beschreibung }));
+                      setForm(f => ({
+                        ...f,
+                        anmerkung_bild: f.anmerkung_bild ? `${f.anmerkung_bild}\n${beschreibung}` : beschreibung,
+                        ki_hook: hook,
+                      }));
                     } catch (err: unknown) {
                       setFehler("KI-Fehler: " + (err instanceof Error ? err.message : String(err)));
                     } finally {
@@ -244,12 +248,11 @@ export function BildBearbeitenModal({ bild, onClose, onSaved, onDeleted }: { bil
                   )}
                 </button>
               </div>
-              {kiHook && (
-                <div className="mb-1.5 px-2.5 py-1.5 rounded-md bg-violet-50 border border-violet-200 text-xs text-violet-800 flex items-center gap-1.5">
-                  <span className="font-semibold">Hook:</span> „{kiHook}"
-                </div>
-              )}
               <textarea rows={3} value={form.anmerkung_bild} onChange={e => setForm({...form, anmerkung_bild: e.target.value})} className={inp} placeholder="Beschreibung für die Webseite…" />
+              <div className="mt-2">
+                <label className="block text-xs font-medium text-gray-600 mb-1">Hook</label>
+                <input value={form.ki_hook} onChange={e => setForm({...form, ki_hook: e.target.value})} className={inp} placeholder="Kurzer Aufhänger für Instagram…" />
+              </div>
             </div>
             <div>
               <label className="block text-xs font-medium text-gray-600 mb-1">Technik *</label>

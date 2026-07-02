@@ -208,7 +208,7 @@ export const bildAktualisieren = (id: number, data: Partial<{
   breite_rahmen_cm: number; hoehe_rahmen_cm: number;
   breite_cm: number; hoehe_cm: number; tiefe_cm: number; gewicht_kg: number;
   einlieferungspreis: number; verkaufspreis: number;
-  anmerkung_bild: string; foto_nr: string;
+  anmerkung_bild: string; ki_hook: string; foto_nr: string;
   in_ausstellung: boolean; freigegeben: boolean;
   abrechnungsempf: string; galerist_id: number | null;
   verfuegbarkeit: import("./types").Verfuegbarkeit;

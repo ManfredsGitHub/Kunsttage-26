@@ -80,6 +80,7 @@ class BildUpdate(BaseModel):
     einlieferungspreis: Optional[float] = None
     verkaufspreis: Optional[float] = None
     anmerkung_bild: Optional[str] = None
+    ki_hook: Optional[str] = None
     foto_nr: Optional[str] = None
     in_ausstellung: Optional[bool] = None
     freigegeben: Optional[bool] = None
@@ -355,10 +356,5 @@ Sprache: Deutsch."""
     except _json.JSONDecodeError:
         hook = ""
         beschreibung = raw
-
-    bild.ki_hook = hook
-    bild.ki_beschreibung = beschreibung
-    session.add(bild)
-    session.commit()
 
     return {"hook": hook, "beschreibung": beschreibung}

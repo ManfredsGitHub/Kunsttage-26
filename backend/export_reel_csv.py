@@ -241,8 +241,8 @@ def export(mit_ki: bool, limit: int | None, output: str) -> None:
 
         genre_str = bild.genre.value if bild.genre else ""
 
-        # KI-Felder: bevorzugt aus DB, sonst live generieren (--mit-ki), sonst Fallback
-        ki_text = bild.ki_beschreibung or ""
+        # KI-Felder: bevorzugt redaktionell gepflegte Anmerkung, sonst live generieren (--mit-ki), sonst Fallback
+        ki_text = bild.anmerkung_bild or ""
         hook = bild.ki_hook or ""
 
         if not ki_text or not hook:

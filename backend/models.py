@@ -187,7 +187,6 @@ class Bild(BildBase, table=True):
     verkaufspreis: Optional[float] = None
     bild_url_web: Optional[str] = None
     bild_url_original: Optional[str] = None
-    ki_beschreibung: Optional[str] = None
     ki_hook: Optional[str] = None
     verfuegbarkeit: Verfuegbarkeit = Verfuegbarkeit.verfuegbar
     freigegeben: bool = False
@@ -209,6 +208,7 @@ class BildPublic(BildBase):
     verkaufspreis_vorschlag: Optional[float] = None
     verkaufspreis: Optional[float] = None
     bild_url_web: Optional[str] = None
+    ki_hook: Optional[str] = None
     verfuegbarkeit: Verfuegbarkeit
     freigegeben: bool = False
     in_ausstellung: bool = True
